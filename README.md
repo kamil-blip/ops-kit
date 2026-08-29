@@ -2,9 +2,9 @@
 
 ![tests](https://github.com/kamil-blip/ops-kit/actions/workflows/tests.yml/badge.svg)
 
-ops-kit is the system I use to find people for AI safety work and get them to show up: the judges, speakers and participants of research hackathons. It is a headhunting funnel applied to field-building. A research lead says what a sprint needs; I write the ideal profile per track; a candidate database and a rubric produce the leads; I vet each one in 15 to 20 minutes; outreach goes out; every state change is recorded; conversion and delivery are measured per search; and what the research lead says about the list changes the next rubric.
+ops-kit is the system I use to **find people for AI safety work and get them to show up**: the judges, speakers and participants of research hackathons. It is **a headhunting funnel applied to field-building**. For every hackathon and every track, I **write an ideal candidate profile**, **source candidates against that profile** from a database and a rubric, **vet each one in 15 to 20 minutes**, and **reach out to get them to participate**. Every state change is recorded, **conversion and delivery are measured per search**, and what the research lead says about the list changes the next profile.
 
-The goal behind it: give mid-career and senior professionals a cheap first test of working on AI safety. A weekend sprint with a real problem, real judges from the field and a real review is a lower bar than a fellowship or a job application, and for many people it is the first time they engage with the field at all. Sourcing is the machinery that decides who gets invited and makes sure they arrive.
+The goal behind it: **give mid-career and senior professionals a cheap first test of working on AI safety**. A weekend sprint with a real problem, real judges from the field and a real review is a lower bar than a fellowship or a job application, and for many people it is **the first time they engage with the field at all**. Sourcing is the machinery that decides who gets invited and makes sure they arrive.
 
 This repository is the generic, data-free version of that machinery, plus the infrastructure it runs on (a database with provenance, search, a Claude Code hook chain, a learning loop). It ships empty: no people, no events, no credentials. Built in my own time from March 2026 to run my job at a research nonprofit; everything specific to the employer stayed out.
 
@@ -25,19 +25,18 @@ This repository is the generic, data-free version of that machinery, plus the in
 
 ## The same funnel as a headhunting service
 
-80,000 Hours describes its sourcing product as: a hiring manager describes a role; Claude skills generate and adjust a rubric for fit; an AI system searches a database of 16,000+ candidates and returns the top 100 to 300 leads; a headhunter filters those down to the leads worth sending; the hiring manager's feedback calibrates the next list; the team measures placements and strong new leads. This repository runs the same steps with different nouns.
+80,000 Hours describes its sourcing product as: a hiring manager describes a role; Claude skills generate and adjust a rubric for fit; an AI system searches a database of 16,000+ candidates and returns the top 100 to 300 leads; a headhunter filters those down to the leads worth sending; the hiring manager's feedback calibrates the next list; the team measures placements and strong new leads. This repository runs the same steps for hackathons.
 
-| Sourcing step | Headhunting version | Hackathon version, in this repository |
-|---|---|---|
-| The brief | 15 to 30 minute call with the hiring manager | The research lead's note on what a sprint and each of its tracks needs: topics, seniority, conflicts to avoid |
-| The ideal profile | Rubric for candidate fit, generated and tweaked with Claude skills | One profile per search and per track: seniority tier, track-fit signals, sources to search, exclusions (`docs/profiles.md`, `screening/rubrics/`, `examples/sourcing/rubric-skill/`) |
-| The database | 16,000+ candidates | Every person who ever judged, spoke, mentored, submitted or signed up, plus cold leads, with identities resolved, typed attributes carrying a source pointer, and relations dated (`db/schema.sql`) |
-| The initial list | AI system returns the top 100 to 300 | Search over the database plus a deterministic or model scorer against the rubric, with a verbatim evidence quote per criterion (`screening/score.py`, `search/`) |
-| The human filter | Headhunter picks the leads worth sending | Vetting at 15 to 20 minutes per candidate against the guide: track fit, availability, seniority, identity check, red flags (`docs/vetting-guide.md`, `pipeline/verify.py`) |
-| Outreach | Invitation to apply or to suggest someone | Templated, personalised invites with an interpolation lint and a banned-phrase check; history first, two bullets, one ask, an easy out (`pipeline/templates.py`) |
-| Tracking | Placements, hiring-manager reach-outs | A state machine per candidate per search (contacted, sent, interested, confirmed, delivered, declined, withdrew, no reply, bounced); a tracker that answers "who needs a follow-up" and "who confirmed but has not delivered" (`pipeline/tracker.py`, `pipeline/funnel.py`) |
-| Feedback loop | Test rubrics against searches with feedback; more calibrated lists | Delivery and completion per search feed the next profile; feedback becomes a learning row the assistant is shown again on the next similar brief (`learning/`, `examples/sourcing/feedback.py`) |
-| Matching people to work | n/a | A constrained assignment solver: coverage floors, load bands, one senior track-capable reviewer per item, hard conflict-of-interest exclusions (`screening/assign.py`) |
+| Step | In this repository |
+|---|---|
+| Brief | What a sprint and each track needs: topics, seniority, conflicts to avoid |
+| **Ideal candidate profile** | One per hackathon and per track: seniority tier, track-fit signals, where to look, exclusions (`docs/profiles.md`, `screening/rubrics/`) |
+| **Sourcing against the profile** | Database search plus a rubric scorer with an evidence quote per criterion (`search/`, `screening/score.py`) |
+| Vetting | 15 to 20 minutes per candidate against the guide (`docs/vetting-guide.md`, `pipeline/verify.py`) |
+| **Outreach** | Personalised invites with an interpolation lint and a banned-phrase check (`pipeline/templates.py`) |
+| Tracking | A state machine per candidate per search; who needs a follow-up, who confirmed but has not delivered (`pipeline/tracker.py`, `pipeline/funnel.py`) |
+| Feedback | Delivery and completion per search feed the next profile; comments become learnings (`learning/`, `examples/sourcing/feedback.py`) |
+| Assignment | Reviewers matched to work under coverage, load and conflict constraints (`screening/assign.py`) |
 
 ## What it produced, January to August 2026
 
@@ -91,11 +90,11 @@ Real output of each command is in the docs and READMEs next to it.
 
 ## How a search runs
 
-1. **Brief.** The research lead writes what the sprint needs per track. I ask the same questions a headhunter asks a hiring manager: what does a strong reviewer for this track look like, who must not be on it, how many do we need, by when.
-2. **Profile.** One ideal profile per track: seniority tier (senior, mid, junior, each mapped to what they can be assigned), the signals that indicate track fit, where such people are found (past judges, co-organiser referrals, hub organisers, inbound mail, cold lists), and exclusions. `docs/profiles.md`.
-3. **Leads.** The database is searched against the profile. A scorer applies the rubric and attaches a verbatim evidence quote to every criterion score; anything the scorer cannot quote, it cannot score. The list comes back ranked. Must-haves are gates and fail loudly; nice-to-haves are points.
+1. **Brief.** The research lead writes what the sprint needs per track. I ask the same questions a headhunter asks a hiring manager: what does a strong reviewer or participant for this track look like, who must not be on it, how many do we need, by when.
+2. **Ideal candidate profile.** One per hackathon and per track, for judges, speakers and participants: seniority tier (senior, mid, junior, each mapped to what they can be assigned), the signals that indicate track fit, where such people are found (past judges, co-organiser referrals, hub organisers, inbound mail, cold lists, partner programmes), and exclusions. `docs/profiles.md`.
+3. **Sourcing candidates against the profile.** The database is searched against each profile. A scorer applies the rubric and attaches a verbatim evidence quote to every criterion score; anything the scorer cannot quote, it cannot score. The list comes back ranked. Must-haves are gates and fail loudly; nice-to-haves are points. This is the step that decides who gets invited to each hackathon.
 4. **Vetting.** 15 to 20 minutes per lead against `docs/vetting-guide.md`. The guide is specific about where the signal is: for AI safety researchers, LinkedIn is weak; a MATS page, a personal site, the Alignment Forum or Scholar is where the evidence sits. Identity and email are verified per person before any cold wave, because a scraped list once matched the wrong individual in 9 of 44 rows.
-5. **Outreach.** Templates rendered per person, linted for unresolved placeholders and banned phrases. Recruit two to three times the number needed; expect a third to half to decline. The rules learned from failures are in `docs/outreach.md`, each with when, then and because.
+5. **Outreach to get them to participate.** Templates rendered per person, linted for unresolved placeholders and banned phrases; history first, two bullets, one ask, an easy out. Recruit two to three times the number needed; expect a third to half to decline. The rules learned from failures are in `docs/outreach.md`, each with when, then and because.
 6. **Tracking.** Every reply moves the candidate's state; illegal transitions are refused by a trigger. The tracker lists who needs a follow-up, who is in the dead zone, and who confirmed but has not delivered. An acceptance is not a confirmed candidate until the row exists. `docs/states.md`.
 7. **Feedback.** Delivery and completion per search go back into the profile, and the research lead's comments on the list are stored as learnings the assistant surfaces on the next similar brief.
 
