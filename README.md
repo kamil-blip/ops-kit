@@ -10,7 +10,7 @@ This repository is the generic, data-free version of that machinery, plus the in
 
 ## Contents
 
-- [The same funnel as a headhunting service](#the-same-funnel-as-a-headhunting-service)
+- [The funnel](#the-funnel)
 - [What it produced, January to August 2026](#what-it-produced-january-to-august-2026)
 - [Run it](#run-it)
 - [How a search runs](#how-a-search-runs)
@@ -23,9 +23,9 @@ This repository is the generic, data-free version of that machinery, plus the in
 - [What is not here](#what-is-not-here)
 - [Origin and licence](#origin-and-licence)
 
-## The same funnel as a headhunting service
+## The funnel
 
-80,000 Hours describes its sourcing product as: a hiring manager describes a role; Claude skills generate and adjust a rubric for fit; an AI system searches a database of 16,000+ candidates and returns the top 100 to 300 leads; a headhunter filters those down to the leads worth sending; the hiring manager's feedback calibrates the next list; the team measures placements and strong new leads. This repository runs the same steps for hackathons.
+Sourcing people for a hackathon has the same shape as sourcing candidates for a hire: a brief, a profile, a database, a ranked list, a human filter, outreach, tracking, feedback. This is the version in this repository.
 
 | Step | In this repository |
 |---|---|
