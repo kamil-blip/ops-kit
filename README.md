@@ -2,7 +2,7 @@
 
 ![tests](https://github.com/kamil-blip/ops-kit/actions/workflows/tests.yml/badge.svg)
 
-ops-kit is the system I use to **find people for AI safety work and get them to show up**: the judges, speakers and participants of research hackathons. It is **a headhunting funnel applied to field-building**. For every hackathon and every track, I **write an ideal candidate profile**, **source candidates against that profile** from a database and a rubric, **vet each one in 15 to 20 minutes**, and **reach out to get them to participate**. Every state change is recorded, **conversion and delivery are measured per search**, and what the research lead says about the list changes the next profile.
+ops-kit is the system I use to **find people for AI safety work and get them to show up**: the judges, speakers and participants of research hackathons. It is **a headhunting funnel applied to field-building**. For every hackathon and every track, I **write an ideal candidate profile**, **source candidates against that profile** from a database and a rubric, **vet each one**, and **reach out to get them to participate**. Every state change is recorded, **conversion and delivery are measured per search**, and what the research lead says about the list changes the next profile.
 
 The goal behind it: **give mid-career and senior professionals a cheap first test of working on AI safety**. A weekend sprint with a real problem, real judges from the field and a real review is a lower bar than a fellowship or a job application, and for many people it is **the first time they engage with the field at all**. Sourcing is the machinery that decides who gets invited and makes sure they arrive.
 
@@ -32,7 +32,7 @@ This repository is the generic, data-free version of that machinery, plus the in
 | Brief | What a sprint and each track needs: topics, seniority, conflicts to avoid |
 | **Ideal candidate profile** | One per hackathon and per track: seniority tier, track-fit signals, where to look, exclusions (`docs/profiles.md`, `screening/rubrics/`) |
 | **Sourcing against the profile** | Database search plus a rubric scorer with an evidence quote per criterion (`search/`, `screening/score.py`) |
-| Vetting | 15 to 20 minutes per candidate against the guide (`docs/vetting-guide.md`, `pipeline/verify.py`) |
+| Vetting | Each lead checked against the guide: track fit, availability, seniority, identity, red flags (`docs/vetting-guide.md`, `pipeline/verify.py`) |
 | **Outreach** | Personalised invites with an interpolation lint and a banned-phrase check (`pipeline/templates.py`) |
 | Tracking | A state machine per candidate per search; who needs a follow-up, who confirmed but has not delivered (`pipeline/tracker.py`, `pipeline/funnel.py`) |
 | Feedback | Delivery and completion per search feed the next profile; comments become learnings (`learning/`, `examples/sourcing/feedback.py`) |
@@ -52,7 +52,6 @@ Measured on the source system's database on 28 and 30 August 2026, restricted to
 | Judges who delivered their reviews, per search | 82% to 94% |
 | Average days from first contact to confirmation, per search | 2.7 to 6.0 |
 | Organisations represented among confirmed judges, on record | 43 (a floor; the graph has an organisation edge for 59 of the 250) |
-| Vetting time per candidate | 15 to 20 minutes |
 | Wrong-person rate caught in one scraped cold list, before verification became mandatory | 9 of 44 (20%) |
 | Submissions pre-screened with a rubric and two model families | 754 |
 | Rubric scoring validated against human reviews | 121 projects; rank correlation 0.43 for the better model, 0.21 for the weaker, 0.57 between the two |
@@ -93,7 +92,7 @@ Real output of each command is in the docs and READMEs next to it.
 1. **Brief.** The research lead writes what the sprint needs per track. I ask the same questions a headhunter asks a hiring manager: what does a strong reviewer or participant for this track look like, who must not be on it, how many do we need, by when.
 2. **Ideal candidate profile.** One per hackathon and per track, for judges, speakers and participants: seniority tier (senior, mid, junior, each mapped to what they can be assigned), the signals that indicate track fit, where such people are found (past judges, co-organiser referrals, hub organisers, inbound mail, cold lists, partner programmes), and exclusions. `docs/profiles.md`.
 3. **Sourcing candidates against the profile.** The database is searched against each profile. A scorer applies the rubric and attaches a verbatim evidence quote to every criterion score; anything the scorer cannot quote, it cannot score. The list comes back ranked. Must-haves are gates and fail loudly; nice-to-haves are points. This is the step that decides who gets invited to each hackathon.
-4. **Vetting.** 15 to 20 minutes per lead against `docs/vetting-guide.md`. The guide is specific about where the signal is: for AI safety researchers, LinkedIn is weak; a MATS page, a personal site, the Alignment Forum or Scholar is where the evidence sits. Identity and email are verified per person before any cold wave, because a scraped list once matched the wrong individual in 9 of 44 rows.
+4. **Vetting.** Every lead is checked against `docs/vetting-guide.md`. The guide is specific about where the signal is: for AI safety researchers, LinkedIn is weak; a MATS page, a personal site, the Alignment Forum or Scholar is where the evidence sits. Identity and email are verified per person before any cold wave, because a scraped list once matched the wrong individual in 9 of 44 rows.
 5. **Outreach to get them to participate.** Templates rendered per person, linted for unresolved placeholders and banned phrases; history first, two bullets, one ask, an easy out. Recruit two to three times the number needed; expect a third to half to decline. The rules learned from failures are in `docs/outreach.md`, each with when, then and because.
 6. **Tracking.** Every reply moves the candidate's state; illegal transitions are refused by a trigger. The tracker lists who needs a follow-up, who is in the dead zone, and who confirmed but has not delivered. An acceptance is not a confirmed candidate until the row exists. `docs/states.md`.
 7. **Feedback.** Delivery and completion per search go back into the profile, and the research lead's comments on the list are stored as learnings the assistant surfaces on the next similar brief.
