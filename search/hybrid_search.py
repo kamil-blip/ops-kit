@@ -33,7 +33,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 try:
     import paths  # repo path resolver (core/paths.py); on sys.path via the installer's .pth
@@ -129,6 +129,7 @@ class ExpandedQuery:
 # Session-level cache for expansion results (avoids repeated API calls)
 _expand_cache: dict = {}
 
+EXPAND_MODEL = "gemini-2.5-flash"  # query-expansion model; override here or in config
 EXPAND_PROMPT = """Extract structured search intent from this people-search query. Return ONLY valid JSON, no markdown.
 
 Query: "{query}"
@@ -184,7 +185,7 @@ def query_expand(query: str, verbose: bool = False) -> ExpandedQuery:
         )
 
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=EXPAND_MODEL,
             contents=EXPAND_PROMPT.format(query=query),
             config=genai_client.types.GenerateContentConfig(
                 temperature=0.0,

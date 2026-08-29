@@ -238,10 +238,10 @@ CALENDAR_DOMAINS = {
     "calendar-notification@google.com", "granola.ai",
 } | _cfg_set("triage.calendar_domains")
 
-# Humans at the payment vendor — high-tier payment lane.
+# Humans at the payment vendor, high-tier payment lane.
 # e.g. payment_humans = ["accounts@payvendor.example"]
 PAYMENT_HUMANS = _cfg_set("triage.payment_humans")
-# Automated payment senders — lower tier.
+# Automated payment senders, lower tier.
 # e.g. payment_auto = ["jira@payvendor.example", "billing@zoom.us"]
 PAYMENT_AUTO = _cfg_set("triage.payment_auto")
 
@@ -268,7 +268,7 @@ if not _mention_cfg:
 MENTION_TOKENS = tuple(_mention_cfg)
 
 
-# Cached partner emails + domains — config lists plus (when present) an
+# Cached partner emails + domains, config lists plus (when present) an
 # operator-maintained partner_orgs table. This kit ships no such table;
 # without it the partner lane runs on the config lists alone.
 def _load_partner_set(conn: sqlite3.Connection) -> tuple[set[str], set[str]]:
@@ -443,7 +443,7 @@ class Classifier:
         if sender in self.partner_emails or domain in self.partner_domains:
             return self._make(LANE_PARTNER, "rule:partner_org", context_slug)
 
-        # Rule 7: Role-based lanes — LATEST role wins. `roles` is pre-sorted
+        # Rule 7: Role-based lanes, LATEST role wins. `roles` is pre-sorted
         # by updated_at DESC; first entry is the most recent role for this
         # person. If the most recent role is a priority role they route to
         # collaborator even if older general-role rows exist.
@@ -459,7 +459,7 @@ class Classifier:
                 return self._make(LANE_GENERAL, "rule:person_role_general",
                                   context_slug, stage_boost=stage)
 
-        # Rule 8: Shared-inbox — external mail addressed to a Google-Group
+        # Rule 8: Shared-inbox, external mail addressed to a Google-Group
         # inbox that no higher-priority rule claimed. Tier 2 so it surfaces
         # with a 24h SLA instead of drowning in Forums-tab burial.
         if group_recipient and (not ORG_DOMAIN or domain != ORG_DOMAIN):
@@ -471,7 +471,7 @@ class Classifier:
                 and sender not in VIP_CONTACTS:
             return self._make(LANE_ORG_INTERNAL, "rule:org_internal", context_slug)
 
-        # Rule 10: Default — external person, assume general correspondence
+        # Rule 10: Default, external person, assume general correspondence
         return self._make(LANE_GENERAL, "rule:default_external", context_slug)
 
     def _domain_match(self, sender: str, domain: str, candidates: set[str]) -> bool:
@@ -489,7 +489,7 @@ class Classifier:
     def _make(self, lane: str, source: str, context_slug: str | None,
               tier_override: int | None = None, stage_boost: int = 0) -> dict:
         tier_base = tier_override if tier_override is not None else LANE_TIER[lane]
-        # Event stage boost — only applies to lanes with a tier numeric SLA
+        # Event stage boost, only applies to lanes with a tier numeric SLA
         if context_slug and context_slug in self.imminent_events and tier_base > 0:
             stage_boost = max(stage_boost, 1)
         tier = max(0, tier_base - stage_boost)
@@ -943,7 +943,7 @@ def reconcile_replies(dry_run: bool = False) -> dict:
         """)
 
     # 2) Close action_items where the linked thread shows we-replied-last
-    #    (status 'replied' OR 'resolved' — either way, the thread is done from
+    #    (status 'replied' OR 'resolved', either way, the thread is done from
     #    our side and the open AI is stale).
     ai_rows = cur.execute("""
         SELECT ai.item_id FROM action_items ai

@@ -169,7 +169,7 @@ def _already_handled(conn, cand) -> tuple[bool, str]:
             n = conn.execute("SELECT COUNT(*) FROM discord_messages WHERE channel_id=? AND author_id=? AND timestamp>?",
                              (chan, OPERATOR_DISCORD_ID, ts)).fetchone()[0]
             return (n > 0, "operator_replied_after" if n else "")
-    except Exception as exc:  # noqa: BLE001 — fail-open: never block a tick on the re-check
+    except Exception as exc:  # noqa: BLE001, fail-open: never block a tick on the re-check
         return (False, f"handled_check_error:{str(exc)[:80]}")
     return (False, "")
 
@@ -463,7 +463,7 @@ def _os_notify(title: str, body: str) -> None:
         )
         subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps],
                        timeout=12, capture_output=True)
-    except Exception:  # noqa: BLE001 — notifications are best-effort only
+    except Exception:  # noqa: BLE001, notifications are best-effort only
         pass
 
 
@@ -487,7 +487,7 @@ def tick(channels=("gmail", "discord", "beeper")) -> dict:
             # scream STALE).
             try:
                 _heartbeat(conn, "paused")
-            except Exception:  # noqa: BLE001 — health stamp must not break the pause
+            except Exception:  # noqa: BLE001, health stamp must not break the pause
                 pass
             conn.close()
             _release_lock()
@@ -518,7 +518,7 @@ def tick(channels=("gmail", "discord", "beeper")) -> dict:
                     notify(conn, did, f"[{ch}] inbound from {cand.get('sender_email') or cand.get('sender_person_id')} awaiting draft")
                     out["landed"] += 1
             _set_cursor(conn, src, maxid)
-        except Exception as exc:  # noqa: BLE001 — isolate this lane, keep the others alive
+        except Exception as exc:  # noqa: BLE001, isolate this lane, keep the others alive
             out["lane_errors"][ch] = str(exc)[:300]
     try:
         # Sweep open drafts that the operator has handled since they landed (freshness fix).
@@ -741,7 +741,7 @@ def match_sent_for_draft(conn, draft: dict) -> dict:
 
 def record_outcome(conn, draft: dict, *, run_ts: str | None = None) -> dict:
     """Insert ONE comms_draft_outcomes row for a draft (idempotent: skip if it already has one).
-    Does NOT stage a learning — pure capture, safe for bulk backfill and the sync sweep.
+    Does NOT stage a learning, pure capture, safe for bulk backfill and the sync sweep.
     Pass run_ts to stamp captured_at explicitly (so a reversal by captured_at is exact)."""
     draft_id = draft["id"]
     if conn.execute("SELECT 1 FROM comms_draft_outcomes WHERE draft_id=?", (draft_id,)).fetchone():

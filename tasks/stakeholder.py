@@ -300,7 +300,7 @@ def derive_stakeholder(item: dict, conn, active_events: Optional[dict[str, dict]
     desc_l = description.lower()
 
     # ------------------------------------------------------------------
-    # Tier 0 / 1 — the manager
+    # Tier 0 / 1, the manager
     # ------------------------------------------------------------------
     sender_pid = item.get("source_person_id")
     sender_email = _sender_email(conn, sender_pid) if sender_pid else None
@@ -324,12 +324,12 @@ def derive_stakeholder(item: dict, conn, active_events: Optional[dict[str, dict]
         return (0, "manager", 1)
     if manager_source:
         return (1, "manager", 0)
-    # Mention without sender attribution — only Tier 1 if clearly directed
+    # Mention without sender attribution, only Tier 1 if clearly directed
     if any(p.search(description) for p in MANAGER_GENERAL_PATTERNS) and ("ask" in desc_l or "needs" in desc_l or "want" in desc_l or "told" in desc_l):
         return (1, "manager", 0)
 
     # ------------------------------------------------------------------
-    # Tier 2 — Partner via the roles table (highest-confidence)
+    # Tier 2, Partner via the roles table (highest-confidence)
     # ------------------------------------------------------------------
     pids: list[int] = []
     for key in ("source_person_id", "about_person_id"):
@@ -357,7 +357,7 @@ def derive_stakeholder(item: dict, conn, active_events: Optional[dict[str, dict]
         return (2, best_partner_role, 0)
 
     # ------------------------------------------------------------------
-    # Tier 2 — Partner via description-keyword fallback
+    # Tier 2, Partner via description-keyword fallback
     # When the item is about a configured partner role even without a person
     # link. Check internal-process hints FIRST so "regenerate the X" doesn't
     # masquerade as partner.
@@ -382,7 +382,7 @@ def derive_stakeholder(item: dict, conn, active_events: Optional[dict[str, dict]
                 return (2, "sponsor", 0)
 
     # ------------------------------------------------------------------
-    # Tier 3 — Current / imminent event contact
+    # Tier 3, Current / imminent event contact
     # An internal-process task TIED TO AN ACTIVE EVENT is still event-tier;
     # the "internal" label only kicks in when there is no active event link.
     # ------------------------------------------------------------------
@@ -402,7 +402,7 @@ def derive_stakeholder(item: dict, conn, active_events: Optional[dict[str, dict]
             return (3, "participant", 0)
 
     # ------------------------------------------------------------------
-    # Tier 4 — Internal / unknown / past
+    # Tier 4, Internal / unknown / past
     # ------------------------------------------------------------------
     src = (item.get("source_type") or "").lower()
     if src in INTERNAL_SOURCE_TYPES or is_internal_process:

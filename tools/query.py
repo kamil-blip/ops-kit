@@ -337,7 +337,7 @@ def _run(conn):
             print(f"No active learnings match '{query_text}'.")
         return
 
-    # Shortcut: threads "keyword" — FTS5 on email_threads
+    # Shortcut: threads "keyword", FTS5 on email_threads
     if arg1 == "threads":
         query_text = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
         if not query_text.strip():
@@ -363,7 +363,7 @@ def _run(conn):
         print(f"\n({len(rows)} threads)")
         return
 
-    # Shortcut: dms [name-or-keyword] — recent Discord DM threads + FTS content hits
+    # Shortcut: dms [name-or-keyword], recent Discord DM threads + FTS content hits
     if arg1 == "dms":
         query_text = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
         name_like = f"%{query_text}%"
@@ -410,7 +410,7 @@ def _run(conn):
                     print(f"  {(h['timestamp'] or '')[:16]}  [{who[:20]}] {(h['content'] or '')[:90]}")
         return
 
-    # Shortcut: faqs [topic] — list approved/proposed FAQs, optional topic filter
+    # Shortcut: faqs [topic], list approved/proposed FAQs, optional topic filter
     if arg1 == "faqs":
         topic = sys.argv[2] if len(sys.argv) > 2 else None
         params = ()
@@ -434,7 +434,7 @@ def _run(conn):
         print(f"\n({len(rows)} canonical FAQs; {pending} un-clustered occurrences pending cluster review)")
         return
 
-    # Shortcut: episodes "keyword" — hybrid FTS + (when available) semantic on episodes
+    # Shortcut: episodes "keyword", hybrid FTS + (when available) semantic on episodes
     if arg1 == "episodes":
         query_text = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
         if not query_text.strip():
@@ -458,7 +458,7 @@ def _run(conn):
         print(f"\n({len(rows)} episodes; use embed_episodes.py --search for semantic)")
         return
 
-    # Shortcut: sessions "keyword" — FTS over session_log_entries (per-session
+    # Shortcut: sessions "keyword", FTS over session_log_entries (per-session
     # changelog rows split out of the build-status doc)
     if arg1 == "sessions":
         query_text = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
@@ -1315,7 +1315,7 @@ def _route(conn, query):
         schema_cols = conn.execute(f"PRAGMA table_info([{table_name}])").fetchall()
         col_list = ", ".join(f"{c['name']} {c['type']}" for c in schema_cols)
 
-        print(f"  {i}. {table_name} (score: {score:.3f}, {category}) — {desc}")
+        print(f"  {i}. {table_name} (score: {score:.3f}, {category}), {desc}")
         print(f"     Rows: {count}")
         print(f"     Key columns: {key_cols}")
         print(f"     Schema: {col_list}")

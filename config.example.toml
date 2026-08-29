@@ -101,3 +101,7 @@ internal_desc_hints = []
 # Optional domain tables (feature-detected; neither ships with the kit):
 events_table = "events"        # columns: slug, start_date, end_date -> drives the event stage boost
 roles_table = "person_roles"   # columns: person_id, role -> drives the role-based partner tier
+
+[steward]
+# Frontier model used for judgment calls (comms/steward_brain.py). Must be a frontier model.
+brain_model = "claude-opus-4-8"

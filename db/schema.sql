@@ -1,4 +1,4 @@
--- ops-kit empty schema (generated night13 X7 from frozen snapshots)
+-- ops-kit empty schema: CREATE statements only, zero data rows by design.
 -- CREATE statements only; zero data rows by design.
 
 
@@ -2149,9 +2149,9 @@ BEGIN
     WHERE NEW.waiting_on_person_id IS NOT NULL AND EXISTS (SELECT 1 FROM entities WHERE id = 'person-' || NEW.waiting_on_person_id)
       AND NOT EXISTS (SELECT 1 FROM edges WHERE source_id = NEW.item_id AND target_id = 'person-' || NEW.waiting_on_person_id AND relation = 'waiting_on');
     INSERT INTO edges (source_id, target_id, relation, source)
-    SELECT NEW.item_id, 'hack-' || NEW.context_slug, 'for_hackathon', 'trigger:action_item_insert'
-    WHERE NEW.context_slug IS NOT NULL AND EXISTS (SELECT 1 FROM entities WHERE id = 'hack-' || NEW.context_slug)
-      AND NOT EXISTS (SELECT 1 FROM edges WHERE source_id = NEW.item_id AND target_id = 'hack-' || NEW.context_slug AND relation = 'for_hackathon');
+    SELECT NEW.item_id, 'ctx-' || NEW.context_slug, 'for_hackathon', 'trigger:action_item_insert'
+    WHERE NEW.context_slug IS NOT NULL AND EXISTS (SELECT 1 FROM entities WHERE id = 'ctx-' || NEW.context_slug)
+      AND NOT EXISTS (SELECT 1 FROM edges WHERE source_id = NEW.item_id AND target_id = 'ctx-' || NEW.context_slug AND relation = 'for_hackathon');
 END;
 CREATE TRIGGER action_items_to_entities_au
 AFTER UPDATE ON action_items
@@ -2199,9 +2199,9 @@ BEGIN
     WHERE NEW.person_id IS NOT NULL AND EXISTS (SELECT 1 FROM entities WHERE id = 'person-' || NEW.person_id)
       AND NOT EXISTS (SELECT 1 FROM edges WHERE source_id = NEW.thread_id AND target_id = 'person-' || NEW.person_id AND relation = 'with_person');
     INSERT INTO edges (source_id, target_id, relation, source)
-    SELECT NEW.thread_id, 'hack-' || NEW.context_slug, 'for_hackathon', 'trigger:email_thread_insert'
-    WHERE NEW.context_slug IS NOT NULL AND EXISTS (SELECT 1 FROM entities WHERE id = 'hack-' || NEW.context_slug)
-      AND NOT EXISTS (SELECT 1 FROM edges WHERE source_id = NEW.thread_id AND target_id = 'hack-' || NEW.context_slug AND relation = 'for_hackathon');
+    SELECT NEW.thread_id, 'ctx-' || NEW.context_slug, 'for_hackathon', 'trigger:email_thread_insert'
+    WHERE NEW.context_slug IS NOT NULL AND EXISTS (SELECT 1 FROM entities WHERE id = 'ctx-' || NEW.context_slug)
+      AND NOT EXISTS (SELECT 1 FROM edges WHERE source_id = NEW.thread_id AND target_id = 'ctx-' || NEW.context_slug AND relation = 'for_hackathon');
     INSERT INTO edges (source_id, target_id, relation, source)
     SELECT NEW.thread_id, NEW.action_item_id, 'resolved_by', 'trigger:email_thread_insert'
     WHERE NEW.action_item_id IS NOT NULL AND EXISTS (SELECT 1 FROM entities WHERE id = NEW.action_item_id)
@@ -2392,11 +2392,11 @@ WHEN (SELECT value FROM steward_config WHERE key='write_gate_mode')='blocking'
 BEGIN SELECT RAISE(ABORT,'write_gate(blocking): NULL-actor edges UPDATE'); END;
 CREATE TRIGGER mc_self_pair_guard_bi BEFORE INSERT ON merge_candidates
 WHEN NEW.canonical_id = NEW.duplicate_id
-BEGIN SELECT RAISE(ABORT, 'merge_candidates: canonical_id==duplicate_id self-pair rejected (night5 N5B guard)'); END;
+BEGIN SELECT RAISE(ABORT, 'merge_candidates: canonical_id==duplicate_id self-pair rejected'); END;
 CREATE TRIGGER mc_self_pair_guard_bu BEFORE UPDATE ON merge_candidates
 WHEN NEW.canonical_id = NEW.duplicate_id
  AND (OLD.canonical_id <> NEW.canonical_id OR OLD.duplicate_id <> NEW.duplicate_id)
-BEGIN SELECT RAISE(ABORT, 'merge_candidates: canonical_id==duplicate_id self-pair rejected (night5 N5B guard)'); END;
+BEGIN SELECT RAISE(ABORT, 'merge_candidates: canonical_id==duplicate_id self-pair rejected'); END;
 CREATE TRIGGER gate_edges_ad BEFORE DELETE ON edges
 WHEN (SELECT value FROM steward_config WHERE key='write_gate_mode')='blocking'
  AND (SELECT actor FROM _audit_context WHERE id=1) IS NULL
@@ -2491,24 +2491,20 @@ SELECT et.thread_id, et.lane, et.stakeholder_tier, et.subject,
  WHERE et.status = 'pending'
    AND et.freshness_sla_hours IS NOT NULL
    AND et.last_inbound_ts IS NOT NULL
-   -- night5 N5M: 30d+ pending threads are auto-expire territory
+   -- pending threads older than 30 days are treated as expired
    -- (auto_close_stale flips them to status='stale'), not live breaches.
    AND et.last_inbound_ts >= datetime('now','-30 days')
    AND (et.last_outbound_ts IS NULL OR et.last_inbound_ts > et.last_outbound_ts)
    AND (julianday('now') - julianday(et.last_inbound_ts)) * 24 > et.freshness_sla_hours
-   -- night5 N5M: automated senders + calendar RSVPs never need a reply.
+   -- automated senders and calendar RSVPs never need a reply; extend this list with your own vendors
    -- Luma usr-*@user.luma-mail.com relays are MASKED HUMANS and stay in.
    AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%no-reply%'
    AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%noreply%'
    AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%donotreply%'
    AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%do-not-reply%'
    AND lower(COALESCE(et.last_sender_email,'')) NOT IN (
-        'notify@mail.notion.so', 'communications@ramp.com',
-        'executiveassistant@e.read.ai', 'calendar-notification@google.com')
+        'notify@mail.notion.so', 'calendar-notification@google.com')
    AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%@mail.notion.so'
-   AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%@e.read.ai'
-   AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%@cloudhq.net'
-   AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%@mercury.com'
    AND lower(COALESCE(et.last_sender_email,'')) NOT LIKE '%calendar-server.bounces.google.com'
    AND et.subject NOT LIKE 'Accepted:%'
    AND et.subject NOT LIKE 'Declined:%'

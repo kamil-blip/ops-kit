@@ -314,7 +314,7 @@ try:
         severity = "CRITICAL" if set(categories) & CRITICAL_CATEGORIES else "WARNING"
 
         msg = (
-            f"[PROMPT INJECTION SCAN — {severity}]\n"
+            f"[PROMPT INJECTION SCAN, {severity}]\n"
             f"Tool: {tool_name}\n"
             f"Categories: {', '.join(categories)}\n"
             f"Findings:\n  - " + "\n  - ".join(samples) + "\n\n"

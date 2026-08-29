@@ -96,7 +96,7 @@ def _table_exists(conn: sqlite3.Connection, name: str) -> bool:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# query.py health — system snapshot
+# query.py health, system snapshot
 # ═══════════════════════════════════════════════════════════════════════════
 
 def _health_sync(conn: sqlite3.Connection) -> list[tuple[str, float | None, str]]:
@@ -249,7 +249,7 @@ def _health_work_queue(conn: sqlite3.Connection) -> dict:
     except ImportError:
         return {"handlers": {}, "alerts": [], "total": 0,
                 "error": "optional worker layer not installed"}
-    except Exception as exc:  # noqa: BLE001 — health must never crash
+    except Exception as exc:  # noqa: BLE001, health must never crash
         return {"handlers": {}, "alerts": [], "total": 0, "error": str(exc)[:200]}
 
 
@@ -428,7 +428,7 @@ def cmd_health() -> int:
                 print(f"  sole-copy stranded  : unavailable ({str(_exc)[:60]})")
         print()
 
-        # STEWARD (Context Steward heartbeat — surfaces a dead/stale steward + queue depths)
+        # STEWARD (Context Steward heartbeat, surfaces a dead/stale steward + queue depths)
         print("STEWARD")
         try:
             sh = conn.execute("SELECT last_tick_at,last_tick_status,ticks_total,last_review_depth,"
@@ -452,7 +452,7 @@ def cmd_health() -> int:
         else:
             print("  last tick           : NEVER  STALE/DEAD")
 
-        # WRITE-GATE — STOCK (historical NULL-actor backlog) + FLOW. Header
+        # WRITE-GATE, STOCK (historical NULL-actor backlog) + FLOW. Header
         # and scoreboard labels read the LIVE mode: hardcoded mode strings
         # once kept printing 'advisory' for weeks after the gate went
         # blocking, so the mode is always read from steward_config.

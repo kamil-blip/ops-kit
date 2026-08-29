@@ -53,7 +53,6 @@ from __future__ import annotations
 import paths
 
 import argparse
-import io
 import json
 import os
 import re

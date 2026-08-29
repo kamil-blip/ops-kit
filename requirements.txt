@@ -13,6 +13,10 @@ anthropic>=0.34
 # Matching / ranking
 rapidfuzz>=3.6
 
+# Search / embeddings (search/embed_*.py, hybrid_search, rrf_search, faq gate)
+numpy>=1.26
+sentence-transformers>=3.0
+
 # Learning-loop spaced repetition (hooks/session_lifecycle.py auto-review;
 # degrades gracefully to no-op when absent)
 fsrs>=6.0

@@ -1,4 +1,4 @@
-"""sync_discord_dms.py — Sync the operator's Discord DM channels + messages into ops.db.
+"""sync_discord_dms.py, Sync the operator's Discord DM channels + messages into ops.db.
 
 Why this exists separately from sync_discord():
   - sync_discord() uses the **bot token** which cannot access user DMs.
@@ -27,7 +27,7 @@ import paths
 import config
 import argparse, json, keyring, sqlite3, sys, time, urllib.error, urllib.parse, urllib.request
 import _db  # unified connector (busy_timeout + FK ON)
-from datetime import datetime, timezone
+from datetime import datetime
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -270,7 +270,7 @@ def main():
     print(f"[DM Sync] Starting at {datetime.now().isoformat()[:19]}")
     print(f"  cutoff: {args.since}")
 
-    # 1. Refresh channel list (always — DM list is small and changes rarely).
+    # 1. Refresh channel list (always, DM list is small and changes rarely).
     print("  Fetching DM channel list via /users/@me/channels...")
     channels = api_get(token, "users/@me/channels")
     if not channels:
@@ -310,7 +310,7 @@ def main():
         if new > 0:
             channels_with_new += 1
             total_new += new
-            # Don't spam — only print channels with new activity.
+            # Don't spam, only print channels with new activity.
             ch_info = conn.execute(
                 "SELECT name FROM discord_channels WHERE id = ?", (ch_id,)
             ).fetchone()

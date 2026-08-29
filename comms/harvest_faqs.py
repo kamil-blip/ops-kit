@@ -24,7 +24,6 @@ After promote, run `embed_faqs.py --include-proposed` to make the new
 FAQs semantically searchable.
 """
 import argparse
-import io
 import re
 import sqlite3
 import struct

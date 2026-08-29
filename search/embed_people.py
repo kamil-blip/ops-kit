@@ -9,7 +9,6 @@ Usage:
 Requires: sqlite-vec, sentence-transformers, onnxruntime
 Model: BAAI/bge-small-en-v1.5 (384-dim, ~33MB, free, local)
 """
-import sqlite3
 import struct
 import sys
 import time

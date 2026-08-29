@@ -1,17 +1,17 @@
-"""Steward brain — the frontier-model-only judgment layer (LAW 0).
+"""Steward brain, the frontier-model-only judgment layer (LAW 0).
 
 Every judgment call (verify a fact at its source, resolve an ambiguous identity,
 infer intent, adjudicate a multi-model disagreement) goes through here, and the only
 model allowed in the decision path is the configured frontier brain
-(`claude-opus-4-8`). There is deliberately NO cheap-model fallback path in this
-module — if the frontier brain is unreachable, `judge()` raises BrainUnavailable and
+(default `claude-opus-4-8`, set `[steward] brain_model` in config.toml). There is deliberately NO cheap-model fallback path in this
+module, if the frontier brain is unreachable, `judge()` raises BrainUnavailable and
 the caller leaves the item queued + alarms. A lesser/local model NEVER decides.
 
 Two ways the brain runs:
-  * Agentically — a Claude Code SYSTEM session (a frontier model) drains the judgment
+  * Agentically, a Claude Code SYSTEM session (a frontier model) drains the judgment
     queue in-context and writes resolutions back through steward_bus. This is the
     primary path; it needs no API key.
-  * Autonomously (opt-in) — a headless scheduled tick calls judge() against the
+  * Autonomously (opt-in), a headless scheduled tick calls judge() against the
     Anthropic API. OFF by default (STEWARD_AUTONOMOUS_BRAIN=1 to enable) so an
     unattended run never spends frontier quota or acts during a live event without
     the operator's say-so.
@@ -26,12 +26,18 @@ from __future__ import annotations
 import json, os, sqlite3
 from _db import connect
 
+try:
+    import config as _cfg
+    DEFAULT_BRAIN_MODEL = _cfg.get("steward.brain_model", "claude-opus-4-8")
+except Exception:  # config optional; fall back to the shipped default
+    DEFAULT_BRAIN_MODEL = "claude-opus-4-8"
+
 FRONTIER_PREFIXES = ("claude-opus", "claude-fable", "claude-mythos")
 
 
 class BrainUnavailable(RuntimeError):
     """Raised when no frontier brain is reachable. The caller must leave the item
-    pending + alarm — never substitute a cheap model."""
+    pending + alarm, never substitute a cheap model."""
 
 
 def _table_exists(conn, name: str) -> bool:
@@ -44,7 +50,7 @@ def brain_model(conn=None) -> str:
     conn = conn or connect()
     try:
         r = conn.execute("SELECT value FROM steward_config WHERE key='brain_model'").fetchone()
-        m = r[0] if r else "claude-opus-4-8"
+        m = r[0] if r else DEFAULT_BRAIN_MODEL
         assert any(m.startswith(p) for p in FRONTIER_PREFIXES), \
             f"LAW 0 violation: brain_model={m!r} is not a frontier model"
         return m
@@ -58,7 +64,7 @@ def enqueue_judgment(conn, *, queue_type: str, payload: dict, trace_json: str | 
                      queued_by: str, priority: int = 5, dedup_key: str | None = None) -> int | None:
     """Queue a judgment for the frontier brain. queue_type in identity|intent|contradiction|promotion.
     If dedup_key is given and a pending row already carries it (payload._dedup), this is a
-    no-op (returns None) — so re-running the producer never duplicates the queue."""
+    no-op (returns None), so re-running the producer never duplicates the queue."""
     if dedup_key is not None:
         payload = {**payload, "_dedup": dedup_key}
         existing = conn.execute(
@@ -89,7 +95,7 @@ def resolve_judgment(conn, judgment_id: int, note: str) -> None:
 
     For queue_type='promotion' this ALSO writes back the linked claim-staging
     row's status in the SAME transaction (parsed from the leading verb of `note`),
-    so a resolved promotion row can never leave its claim stuck at 'pending' —
+    so a resolved promotion row can never leave its claim stuck at 'pending' -
     that staging-drift gap came from resolving the queue row without touching the
     claim. Verb->status map:
         reject_claim / resolve_no_action -> 'rejected'
@@ -131,7 +137,7 @@ def autonomous_enabled() -> bool:
 def judge(prompt: str, *, system: str | None = None, schema: dict | None = None,
           effort: str = "high", max_tokens: int = 4000) -> dict | str:
     """Run one judgment on the frontier brain. Returns parsed JSON if a schema is given,
-    else the text. Raises BrainUnavailable if the brain can't be reached — the caller
+    else the text. Raises BrainUnavailable if the brain can't be reached, the caller
     MUST then leave the item queued + alarm. No cheap-model fallback exists here."""
     model = brain_model()
     try:

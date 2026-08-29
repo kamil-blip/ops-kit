@@ -1,4 +1,4 @@
-"""drift_check.py — drift detector for the ops database.
+"""drift_check.py, drift detector for the ops database.
 
 Ten checks run against the ops DB. Findings are upserted into ``drift_alerts``;
 re-firing the same alert_type updates fire_count + last_fired_at instead of
@@ -377,7 +377,7 @@ def _check_fts_sync_drift(conn: sqlite3.Connection) -> dict | None:
 
 
 def _check_people_email_fragments(conn: sqlite3.Connection) -> dict | None:
-    """People rows whose email holds a bare word fragment (no @) — the
+    """People rows whose email holds a bare word fragment (no @), the
     name-split ingest damage class. name==email misses some known victims, so
     the structural probe is email-without-@. Fires only on rows CREATED in the
     last 14d (fresh ingest damage); legacy fragments predating the window are
@@ -403,7 +403,7 @@ def _check_people_email_fragments(conn: sqlite3.Connection) -> dict | None:
     return {
         "alert_type": "people_email_fragments_new",
         "severity": "warn",
-        "summary": f"{len(rows)} people row(s) created in last 14d with fragment emails (no @) — name-split ingest damage recurring; {total} total live fragments",
+        "summary": f"{len(rows)} people row(s) created in last 14d with fragment emails (no @), name-split ingest damage recurring; {total} total live fragments",
         "detail": {"new_rows": [dict(r) for r in rows], "total_live_fragments": total,
                    "fix": "inspect the import batch; repair via merge proposals, not direct edits"},
     }
@@ -628,17 +628,17 @@ def run_checks() -> dict:
         conn.close()
 
 
-# ── daily reconcile — auto-open remediation proposals ─────────────────────
+# ── daily reconcile, auto-open remediation proposals ─────────────────────
 def reconcile_alerts(conn: sqlite3.Connection) -> dict:
     """Open one action_items_inbox remediation proposal per open, unsuppressed
     drift alert. Caller owns the transaction/commit.
 
     Guards (in order):
-      1. signature idempotency — source_ref ``drift_alerts:<id>:<type>`` already
+      1. signature idempotency, source_ref ``drift_alerts:<id>:<type>`` already
          proposed once (ANY status incl. rejected) => never opens twice.
-      2. pending pile-up — a still-pending remediation row for the same
+      2. pending pile-up, a still-pending remediation row for the same
          alert_type (earlier open-window) blocks a new open.
-      3. daily cap — at most RECONCILE_DAILY_CAP opens per UTC day, counted
+      3. daily cap, at most RECONCILE_DAILY_CAP opens per UTC day, counted
          from rows already inserted today with source=RECONCILE_SOURCE.
     """
     try:
@@ -683,7 +683,7 @@ def reconcile_alerts(conn: sqlite3.Connection) -> dict:
             continue
 
         # Guard 2: a pending remediation row for this alert_type still awaits
-        # triage (earlier open-window) — don't stack a second one.
+        # triage (earlier open-window), don't stack a second one.
         if conn.execute(
             "SELECT 1 FROM action_items_inbox "
             "WHERE source = ? AND status = 'pending' AND source_ref LIKE ?",

@@ -1,4 +1,4 @@
-"""sync_summaries.py — write one row per brief.py sync run.
+"""sync_summaries.py, write one row per brief.py sync run.
 
 Captures: ingest counts (emails/discord/beeper/granola), action_item lifecycle
 deltas, dossier refreshes, ingest_rejections, handler failures, and any
@@ -83,7 +83,7 @@ class SyncSummary:
         # Baseline counts (set on enter)
         self._baseline: dict[str, int] = {}
 
-        # Optional manual overrides — caller can bump these
+        # Optional manual overrides, caller can bump these
         self.dossiers_refreshed: int = 0
         self.people_updated: int = 0
         self.handler_failures_override: int | None = None

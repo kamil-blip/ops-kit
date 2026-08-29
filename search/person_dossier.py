@@ -347,7 +347,7 @@ def dossier(query):
             lines.append("## Bio")
             lines.append(bio["bio"].strip())
             lines.append(f"*source: {bio['bio_source']} (as of {bio['bio_updated_at']})*")
-    except Exception:  # noqa: BLE001 — bio surface is additive, never break the dossier
+    except Exception:  # noqa: BLE001, bio surface is additive, never break the dossier
         pass
 
     lines.append(f"**Interactions:** {person['interaction_count'] or 0}")
@@ -599,7 +599,7 @@ def dossier(query):
             due = f" due={a['due_date']}" if a["due_date"] else ""
             lines.append(f"- {a['item_id']} [{a['status']}/{a['priority'] or '-'}]{ctx}{due}{via}: {(a['description'] or '')[:130]}")
     else:
-        lines.append("(none — no action_items have creator_person_id set to this person)")
+        lines.append("(none, no action_items have creator_person_id set to this person)")
     lines.append("")
 
     # ═══ SURVEYS ═══
@@ -618,7 +618,7 @@ def dossier(query):
         for s in survey_edges:
             kind = s["relation"].replace("submitted_", "").replace("_survey", "")
             when = (s["valid_from"] or "")[:10]
-            fact = f" — {s['fact']}" if s["fact"] else ""
+            fact = f", {s['fact']}" if s["fact"] else ""
             lines.append(f"- {when}  [{kind}]{fact}")
     else:
         lines.append("(none)")

@@ -1,4 +1,4 @@
-"""Staging API — the only canonical-write entrypoint for non-steward code.
+"""Staging API, the only canonical-write entrypoint for non-steward code.
 
 A writer calls `submit()` (async: stage, the steward drains later) or
 `steward_bus.write()` (sync: stage + publish-now in the same call). Either way
@@ -18,7 +18,7 @@ BUSY_TIMEOUT_FLOOR_MS = 30_000
 
 def _ensure_busy_timeout(conn: sqlite3.Connection) -> None:
     """The staging layer must not trust callers to set busy_timeout (submit()
-    raised database-is-locked until the caller set it — enforce the floor here)."""
+    raised database-is-locked until the caller set it, enforce the floor here)."""
     try:
         cur = conn.execute("PRAGMA busy_timeout").fetchone()[0]
         if cur is None or int(cur) < BUSY_TIMEOUT_FLOOR_MS:

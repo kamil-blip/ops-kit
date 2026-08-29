@@ -89,16 +89,14 @@ active, expected results in brackets):
 2. `python tools/query.py "SELECT COUNT(*) FROM people"` → [0]
 3. Memory round-trip: insert one `reference_docs` row and read it back through
    `tools/query.py` → [the content comes back]
-4. Learning loop: `python learning/learning_capture.py --selftest` →
-   [`SELFTEST PASS`]; then `python tools/query.py learnings "<a word from a
-   learning you inserted>"` → [that learning comes back]
+4. Learning loop: `python learning/learning_capture.py --selftest` → [`SELFTEST PASS`]. The selftest rolls back its own test row, so insert one to confirm retrieval end to end:
+   `python tools/query.py "INSERT INTO learnings (learning_id, title, description, apply_when, priority, status, memory_type, source, inserted_at, updated_at) VALUES ('LRN-TEST-001','test','test learning','testword','low','active','operational','manual',datetime('now'),datetime('now'))"`
+   then `python tools/query.py learnings "testword"` → [that learning comes back].
 5. Health: `python tools/query.py health` (or
    `python autonomy/health_runbook.py health`) → [prints a health summary;
    empty sections are normal on day 1]
-6. Backup + restore drill: make a backup with
-   `_db.make_backup("install", db_path=paths.DB_PATH)` (selfcheck does this),
-   then `python autonomy/restore_drill.py --backup <that file>` →
-   [`restore-drill PASS`]
+6. Backup + restore drill: `python -c "import sys; sys.path.insert(0,'core'); import _db, paths; print(_db.make_backup('install', db_path=paths.DB_PATH))"` prints the backup path,
+   then `python autonomy/restore_drill.py --backup <that path>` → [`restore-drill PASS`].
 7. Wrap-up skill: end your Claude Code session with "wrap up" → [a
    session_logs row exists: `python tools/query.py "SELECT COUNT(*) FROM
    session_logs"` → 1+]

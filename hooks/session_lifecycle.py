@@ -96,7 +96,7 @@ WRITE_EVENTS = {
 
 SKIP_EVENTS = {"heartbeat", "tool_call"}
 
-# Phrases that mean "nothing happened" — filter these from hook output
+# Phrases that mean "nothing happened", filter these from hook output
 _QUIET_PHRASES = frozenset([
     "no items to unblock", "no recurring items to spawn",
     "no new replies found", "no waiting items with email",
@@ -454,7 +454,7 @@ def on_session_start(data):
                     for lc in anchor['learning_candidates'][:3]:
                         lines.append(f"    - [{lc.get('signal_type','')}] {lc.get('error_summary','')[:60]}")
                 lines.append("")
-            # Don't delete — it's useful across multiple compactions
+            # Don't delete, it's useful across multiple compactions
     except Exception:
         pass
 
@@ -706,7 +706,7 @@ def _phase4_session_addendum(sid):
                 subj = (r["subject"] or "")[:60]
                 parts.append(
                     f"- [{r['channel']}] {r['recipient']} via {r['sent_via']}"
-                    + (f" — {subj}" if subj else "")
+                    + (f", {subj}" if subj else "")
                 )
             parts.append("")
     except Exception as e:
@@ -781,7 +781,7 @@ def _phase4_session_addendum(sid):
         is_partial = True
 
     if is_partial:
-        parts.insert(1, "STATUS: partial — one or more sources errored")
+        parts.insert(1, "STATUS: partial, one or more sources errored")
         parts.insert(2, "")
 
     if len(parts) <= 2:
@@ -1115,7 +1115,7 @@ def on_pre_compact(data):
     msg += f"  People: {len(anchor['people_mentioned'])}, Changes: {len(anchor['changes_made'])}, Corrections: {len(anchor['corrections'])}"
     print(msg, file=sys.stderr)
 
-    # additionalContext to stdout — injected into Claude's context before compaction
+    # additionalContext to stdout, injected into Claude's context before compaction
     additional = _build_additional_context(anchor)
     print(json.dumps({
         "hookSpecificOutput": {

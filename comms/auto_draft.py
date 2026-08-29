@@ -1,4 +1,4 @@
-"""auto_draft.py — Action_item -> FAQ -> Template -> email_drafts pipeline.
+"""auto_draft.py, Action_item -> FAQ -> Template -> email_drafts pipeline.
 
 Trigger: brief.py classify creates a needs_reply action_item with email_thread_id.
 This module:
@@ -246,7 +246,7 @@ def try_draft_from_inbox(conn: sqlite3.Connection, inbox_id: str) -> dict:
     This entry point lets the brief inline-call auto_draft right after proposing
     the inbox row, so reviews see the draft alongside the proposal.
 
-    Safe to call within an existing transaction — uses the passed conn.
+    Safe to call within an existing transaction, uses the passed conn.
     """
     row = conn.execute(
         "SELECT inbox_id, suggested_description, suggested_email_thread_id, "

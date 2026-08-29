@@ -1,10 +1,10 @@
-"""Long-running plan ledger — crash-safe, compaction-proof journaling for
+"""Long-running plan ledger, crash-safe, compaction-proof journaling for
 long-running agent runs.
 
 A run journals every phase to three places so resume never depends on chat memory:
-  * plan_phase_log  — one row per (run_id, phase); the resume cursor.
-  * plan_runs       — one row per (plan_id, phase_id, phase_hash); idempotency.
-  * bus_events      — a visible event stream surfaced by query.py health.
+  * plan_phase_log , one row per (run_id, phase); the resume cursor.
+  * plan_runs      , one row per (plan_id, phase_id, phase_hash); idempotency.
+  * bus_events     , a visible event stream surfaced by query.py health.
 Plus current_plan.json on disk (under data/plan-state/) as the human-readable
 contract. steward_ledger is the sole owner of that file.
 
@@ -22,7 +22,7 @@ Usage:
         L.phase_done("example-run-20260101","1", counts={"tables":3})
 """
 from __future__ import annotations
-import hashlib, json, os, sqlite3, datetime
+import hashlib, json, sqlite3, datetime
 from pathlib import Path
 
 import paths
@@ -36,7 +36,7 @@ def _now() -> str:
 
 
 def idem_key(*parts) -> str:
-    """sha256(plan|phase|step|inputs) — stable across re-entry."""
+    """sha256(plan|phase|step|inputs), stable across re-entry."""
     raw = "|".join("" if p is None else str(p) for p in parts)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 

@@ -27,7 +27,6 @@ Returns up to N hits with:
 """
 import paths
 import argparse
-import io
 import json
 import os
 import re

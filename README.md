@@ -36,6 +36,6 @@ Open [INSTALL.md](INSTALL.md). It is written for your Claude Code to execute top
 
 ## Where it came from
 
-This was carved out of a live production system, not written from scratch as a kit. A few modules were too tied to the original's domain to ship (the LLM claim-extraction and enrichment layer is the main one). Where a shipped module depends on one of those, the stub says so out loud when you hit it and skips cleanly. Some code paths have only ever run on one machine, mine, so expect to adapt a path or two. If something looks wrong, it probably is; fix forward, the code is yours.
+This was carved out of a live production system, not written from scratch as a kit. A few modules were too tied to the original's domain to ship (the LLM claim-extraction and enrichment layer is the main one). The schema still carries a few column names from that domain (`is_judge`, `is_speaker`, `hackathons_participated`, `prize_total` on `people`); they are unused flags here, harmless to rename or ignore. Where a shipped module depends on one of those, the stub says so out loud when you hit it and skips cleanly. Some code paths have only ever run on one machine, mine, so expect to adapt a path or two. If something looks wrong, it probably is; fix forward, the code is yours.
 
 Built by Kamil. MIT, see LICENSE.

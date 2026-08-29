@@ -1,14 +1,14 @@
-"""Resolve-by-tracing — the identity layer of the Write-Audit-Publish spine.
+"""Resolve-by-tracing, the identity layer of the Write-Audit-Publish spine.
 
 Lifted out as a standalone importable. Resolves an incoming person / org
 reference to an existing canonical id BEFORE creating anything. This
-lookup-before-create on natural keys (via person_identities) — NOT foreign keys —
+lookup-before-create on natural keys (via person_identities), NOT foreign keys -
 is the real duplicate-prevention.
 
 Hard rules:
   * Never match a single-token (first-name-only) identity alone
     (disambiguation_risk='high'); require >=2 attribute match or context.
-  * On an ambiguous email/name (the same value mapping to >1 person — these are
+  * On an ambiguous email/name (the same value mapping to >1 person, these are
     un-merged duplicates), return the LOWEST existing person_id and record the
     ambiguity in the trace. Never mint a new person for a value that already
     resolves to one.
@@ -16,7 +16,7 @@ Hard rules:
     nothing matches; stamp new identities so the next lookup finds them.
 """
 from __future__ import annotations
-import hashlib, json, re, sqlite3
+import hashlib, re, sqlite3
 from typing import Optional
 
 PERSONAL_DOMAINS = {
@@ -84,7 +84,7 @@ def email_domain(e: Optional[str]) -> Optional[str]:
 
 
 def source_key(*parts) -> str:
-    """sha256(source:thread:msg ...) — a stable per-fact idempotency seed."""
+    """sha256(source:thread:msg ...), a stable per-fact idempotency seed."""
     raw = ":".join("" if p is None else str(p) for p in parts)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
@@ -135,7 +135,7 @@ def resolve_person(
             # The payload's email reached this step UNRESOLVED (step 1 would have
             # returned otherwise). If the name-matched candidate already has known
             # emails and the payload email is not among them, that email is
-            # DISCONFIRMING — returning the name match here is exactly the
+            # DISCONFIRMING, returning the name match here is exactly the
             # bare-name-overwrite failure mode this guard exists for. Refuse;
             # surface candidates for merge-review. A candidate with NO known email
             # keeps the match (classic fill-when-NULL enrichment, guarded again at

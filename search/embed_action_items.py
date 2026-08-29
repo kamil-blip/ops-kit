@@ -15,7 +15,6 @@ Requires: sqlite-vec, sentence-transformers
 Model: BAAI/bge-small-en-v1.5 (384-dim, ~33MB, free, local) -- matches embed_emails.py
 """
 import io
-import sqlite3
 import struct
 import sys
 import time

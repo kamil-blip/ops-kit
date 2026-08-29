@@ -151,41 +151,7 @@ GMAIL_OUTBOUND_TOOLS = {
 # Banned phrases per the operator's communication-style hard-ban list
 # (anti-AI-slop policy: outbound mail should read as human-written).
 # Stored lowercase, matched via substring on combined body+htmlBody+subject.
-BANNED_PHRASES = [
-    # Openers
-    "i hope this email finds you well",
-    "i wanted to reach out",
-    "just wanted to touch base",
-    "as discussed,",
-    "per our last conversation",
-    "per my last email",
-    # Closers
-    "please don't hesitate",
-    "thank you for your understanding",
-    "i appreciate your patience",
-    "i trust this helps",
-    "i'd be happy to discuss further",
-    "i'd love to explore this",
-    "warm regards",
-    "kind regards",
-    "best regards",
-    # Corporate / AI speak
-    "leverage", "utilize", "facilitate", "endeavor",
-    "comprehensive", "robust", "streamline", "synergy",
-    "cutting-edge", "foster collaboration",
-    # Filler
-    "i'd be happy to",
-    "i'd love to",
-    "moving forward", "going forward",
-    "genuinely", "delve into", "multifaceted",
-    # Transitions
-    "indeed,", "moreover,", "furthermore,",
-    "at the end of the day",
-    "it's worth noting that",
-    "it goes without saying",
-    # Emotions
-    "thrilled to", "excited to", "delighted to",
-]
+from slop_rules import SLOP_BANNED as BANNED_PHRASES  # one list for both hooks
 
 
 def check_gmail_outbound(tool_input: dict):

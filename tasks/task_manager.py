@@ -41,7 +41,6 @@ import _db  # shared DB connector (busy_timeout + FK ON)
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 # Writes to action_items cascade into `entities` (mirror triggers), and the
 # blocking write_gate ABORTs on a NULL actor. Stamp the actor around each
 # mutating write so gated writes succeed.

@@ -1,4 +1,4 @@
-"""The Context Steward tick — the single canonical-writer loop (Write-Audit-Publish).
+"""The Context Steward tick, the single canonical-writer loop (Write-Audit-Publish).
 
 One tick: change-detect (cheap, zero-LLM exit if nothing new) -> [optional] pull
 sources -> PUBLISH staged writes through the command bus -> advance the CDC cursor
@@ -144,7 +144,7 @@ def tick(pull: bool = False, publish: bool = True) -> dict:
                 subprocess.run([PYEXE, str(BRIEF_PY), "sync"], cwd=str(paths.ROOT),
                                timeout=600, capture_output=True)
                 out["pulled"] = True
-            except Exception as e:  # noqa: BLE001 — a pull failure must not abort the tick
+            except Exception as e:  # noqa: BLE001, a pull failure must not abort the tick
                 out["pull_error"] = str(e)[:200]
 
         pub = B.publish_pending(conn) if publish else {}
@@ -161,7 +161,7 @@ def tick(pull: bool = False, publish: bool = True) -> dict:
         if gate["clean"]:
             try:
                 out["write_gate"] = G.write_gate_observe(conn)
-            except Exception as e:  # noqa: BLE001 — observability must never fail the tick
+            except Exception as e:  # noqa: BLE001, observability must never fail the tick
                 out["write_gate_error"] = str(e)[:200]
         ms = int((time.monotonic() - t0) * 1000)
         _heartbeat(conn, status, ms=ms, promoted=pub.get("promoted", 0), rejected=pub.get("rejected", 0),

@@ -21,7 +21,6 @@ import datetime
 import os
 import re
 import shutil
-import sqlite3
 import _db  # unified connector (busy_timeout + FK ON)
 import sys
 

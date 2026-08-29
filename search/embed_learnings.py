@@ -13,7 +13,6 @@ Usage:
 Model: BAAI/bge-small-en-v1.5 (384-dim, local, free) -- the model already used by
 all the vec_* tables, so vectors stay comparable across the corpus.
 """
-import sqlite3
 import struct
 import sys
 import time

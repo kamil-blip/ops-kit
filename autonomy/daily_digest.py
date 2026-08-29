@@ -1,4 +1,4 @@
-"""daily_digest.py — formatted "last 24h ops" snapshot.
+"""daily_digest.py, formatted "last 24h ops" snapshot.
 
 Read-only; safe to run any time. Sections: INGESTED, CASCADE, HEALTH, GROWTH,
 LEARNINGS, DRIFT CHECK, INJECTION SCAN, INBOX BREACHES, REVIEW BACKLOG,
@@ -213,7 +213,7 @@ def _section_health(conn: sqlite3.Connection, since_iso: str) -> dict:
             except ValueError:
                 pass
 
-    # Context Steward heartbeat — surface a dead/stale steward in the brief.
+    # Context Steward heartbeat, surface a dead/stale steward in the brief.
     if _table_exists(conn, "steward_health"):
         sh = conn.execute("SELECT last_tick_at,last_tick_status,last_review_depth,last_staged_pending "
                           "FROM steward_health WHERE id=1").fetchone()
@@ -281,7 +281,7 @@ def _section_drift(conn: sqlite3.Connection) -> dict:
 # scanner but is not an attack surface worth a digest line.
 _INJECTION_LOG = Path(str(paths.PLAN_STATE_DIR / "injection_scanner_findings.log"))
 _INJ_ENTRY_RE = re.compile(r"^=====\s*(?P<ts>\S+)\s*=====\s*$")
-_INJ_SEV_RE = re.compile(r"PROMPT INJECTION SCAN\s*[—-]\s*(?P<sev>CRITICAL|WARNING)")
+_INJ_SEV_RE = re.compile(r"PROMPT INJECTION SCAN\s*[--]\s*(?P<sev>CRITICAL|WARNING)")
 _INJ_TOOL_RE = re.compile(r"^Tool:\s*(?P<tool>\S+)", re.MULTILINE)
 
 
