@@ -2,211 +2,151 @@
 
 ![tests](https://github.com/kamil-blip/ops-kit/actions/workflows/tests.yml/badge.svg)
 
-ops-kit is the infrastructure layer of a personal operations system driven by Claude Code: one SQLite database as the source of truth for people, mail, chat, tasks and notes; search across all of it; a hook chain that logs sessions, injects context and gates outbound text; an MCP server that exposes the database to the assistant as tools; and a learning loop that turns mistakes into rules the assistant sees on every turn. It ships empty. There is no data in this repository, only structure and code.
+ops-kit is the system I use to find people for AI safety work and get them to show up: the judges, speakers and participants of research hackathons. It is a headhunting funnel applied to field-building. A research lead says what a sprint needs; I write the ideal profile per track; a candidate database and a rubric produce the leads; I vet each one in 15 to 20 minutes; outreach goes out; every state change is recorded; conversion and delivery are measured per search; and what the research lead says about the list changes the next rubric.
 
-I built the system it comes from in my own time, starting in March 2026, to run an operations job at a research nonprofit (events, judges, speakers, participants, five inboxes). This repository is the part that is not about that job. Everything specific to the employer stayed out; see [What is not here](#what-is-not-here).
+The goal behind it: give mid-career and senior professionals a cheap first test of working on AI safety. A weekend sprint with a real problem, real judges from the field and a real review is a lower bar than a fellowship or a job application, and for many people it is the first time they engage with the field at all. Sourcing is the machinery that decides who gets invited and makes sure they arrive.
+
+This repository is the generic, data-free version of that machinery, plus the infrastructure it runs on (a database with provenance, search, a Claude Code hook chain, a learning loop). It ships empty: no people, no events, no credentials. Built in my own time from March 2026 to run my job at a research nonprofit; everything specific to the employer stayed out.
 
 ## Contents
 
-- [Problems it addresses](#problems-it-addresses)
-- [What is in the box, in numbers](#what-is-in-the-box-in-numbers)
-- [Quick start](#quick-start)
-- [A first session](#a-first-session)
-- [How it is put together](#how-it-is-put-together)
-- [The same shape as a talent-sourcing product](#the-same-shape-as-a-talent-sourcing-product)
+- [The same funnel as a headhunting service](#the-same-funnel-as-a-headhunting-service)
+- [What it produced, January to August 2026](#what-it-produced-january-to-august-2026)
+- [Run it](#run-it)
+- [How a search runs](#how-a-search-runs)
+- [Rubrics, scoring and validation](#rubrics-scoring-and-validation)
+- [Assignment](#assignment)
+- [Where the leads come from, and what is counterfactual](#where-the-leads-come-from-and-what-is-counterfactual)
+- [Data provenance, consent and acceptable use](#data-provenance-consent-and-acceptable-use)
+- [The infrastructure underneath](#the-infrastructure-underneath)
 - [Tests](#tests)
-- [Design rules](#design-rules)
-- [When not to use it](#when-not-to-use-it)
 - [What is not here](#what-is-not-here)
-- [Status and limitations](#status-and-limitations)
 - [Origin and licence](#origin-and-licence)
 
-## Problems it addresses
+## The same funnel as a headhunting service
 
-Each of these is a failure I had before the corresponding piece existed. The mechanism is what the kit does about it.
+80,000 Hours describes its sourcing product as: a hiring manager describes a role; Claude skills generate and adjust a rubric for fit; an AI system searches a database of 16,000+ candidates and returns the top 100 to 300 leads; a headhunter filters those down to the leads worth sending; the hiring manager's feedback calibrates the next list; the team measures placements and strong new leads. This repository runs the same steps with different nouns.
 
-**The facts live in five places and the assistant sees none of them.** Mail, Discord, Slack, Signal, calendar and meeting notes are pulled into one database by the adapters in `brief/`, on a schedule or on demand. 88 tables, 27 full-text indexes, 9 vector tables. The assistant queries that database through `tools/query.py` (30 shortcuts plus raw SQL) or through the 13 MCP tools, instead of asking you to paste things in.
+| Sourcing step | Headhunting version | Hackathon version, in this repository |
+|---|---|---|
+| The brief | 15 to 30 minute call with the hiring manager | The research lead's note on what a sprint and each of its tracks needs: topics, seniority, conflicts to avoid |
+| The ideal profile | Rubric for candidate fit, generated and tweaked with Claude skills | One profile per search and per track: seniority tier, track-fit signals, sources to search, exclusions (`docs/profiles.md`, `screening/rubrics/`, `examples/sourcing/rubric-skill/`) |
+| The database | 16,000+ candidates | Every person who ever judged, spoke, mentored, submitted or signed up, plus cold leads, with identities resolved, typed attributes carrying a source pointer, and relations dated (`db/schema.sql`) |
+| The initial list | AI system returns the top 100 to 300 | Search over the database plus a deterministic or model scorer against the rubric, with a verbatim evidence quote per criterion (`screening/score.py`, `search/`) |
+| The human filter | Headhunter picks the leads worth sending | Vetting at 15 to 20 minutes per candidate against the guide: track fit, availability, seniority, identity check, red flags (`docs/vetting-guide.md`, `pipeline/verify.py`) |
+| Outreach | Invitation to apply or to suggest someone | Templated, personalised invites with an interpolation lint and a banned-phrase check; history first, two bullets, one ask, an easy out (`pipeline/templates.py`) |
+| Tracking | Placements, hiring-manager reach-outs | A state machine per candidate per search (contacted, sent, interested, confirmed, delivered, declined, withdrew, no reply, bounced); a tracker that answers "who needs a follow-up" and "who confirmed but has not delivered" (`pipeline/tracker.py`, `pipeline/funnel.py`) |
+| Feedback loop | Test rubrics against searches with feedback; more calibrated lists | Delivery and completion per search feed the next profile; feedback becomes a learning row the assistant is shown again on the next similar brief (`learning/`, `examples/sourcing/feedback.py`) |
+| Matching people to work | n/a | A constrained assignment solver: coverage floors, load bands, one senior track-capable reviewer per item, hard conflict-of-interest exclusions (`screening/assign.py`) |
 
-**Keyword search misses what vector search finds, and the reverse.** `search/rrf_search.py` fuses FTS5, sqlite-vec embeddings and graph adjacency with reciprocal-rank fusion, and `search/person_dossier.py` assembles everything known about one person (identities, relations, threads, tasks) in one call.
+## What it produced, January to August 2026
 
-**The assistant forgets what it learned last week.** `learning/` stores rules as rows with a lifecycle, spaced-repetition scheduling (FSRS) and a residency tier. `hooks/context_injector.py` surfaces the relevant ones on every prompt; the top tier is rendered into an always-on block. `hooks/session_lifecycle.py` logs every session and harvests candidate learnings at the end, so the loop closes without a manual step.
+Measured on the source system's database on 28 and 30 August 2026, restricted to the eight sprints that ran in that period. Every figure is a count from a named table; nothing is estimated.
 
-**A model writes something into the database that nobody said.** Canonical writes go through one path, the steward bus in `comms/`: validate, resolve identity, upsert idempotently, stamp who asserted the fact and from which source, all inside a per-row savepoint under a registered actor. `hooks/safety_guard.py` blocks writes to targets you mark protected; the MCP write tool is confirm-gated.
-
-**Outbound text sounds like a model.** `hooks/quality_gate.py` blocks a shared list of banned phrases and every form of em dash at write time (`hooks/slop_rules.py` is the one list both hooks import). `hooks/slop_stats.py` scores structural tells (rationale prose, reassurance beats, tricolons, uniform sentence rhythm) and warns. `hooks/pangram_check.py` is a client for a paid detector, for the rare draft that will be tested by its recipient. Nothing in the kit sends; comms tooling stops at a draft.
-
-**Things fall through.** `tasks/task_manager.py` (36 subcommands) scores urgency by stakeholder tier and stage, runs a daily plan ritual (commit three to five items, then `focus` shows only those), tracks subtasks with contingencies, recurrence and dependencies, and sweeps git history to find items that were done without being closed. `comms/inbox_triage.py` puts every thread in a lane with a response-time target.
-
-**The system breaks quietly.** `tools/selfcheck.py` runs nine checks in one command. `autonomy/` has a nightly job, a short-interval tick, a health runbook, drift detection, backups, a restore drill and a retention pack, meant for your OS scheduler once you trust them.
-
-## What is in the box, in numbers
-
-Measured on the repository at commit `a99636c`, nothing estimated.
-
-| Item | Count |
+| Measure | Value |
 |---|---|
-| Files tracked | 104 |
-| Python files, lines | 82 files, 39,553 lines |
-| Database tables (`db/schema.sql`) | 88 tables, 27 FTS5 virtual tables, 1 view, 129 triggers, 177 indexes |
-| Vector tables (`db/vec_schema.sql`) | 9 |
-| Rows shipped | 0 |
-| Claude Code hooks wired in `hooks/settings.example.json` | 11, across SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, PreCompact and SessionEnd |
-| MCP tools (`core/mcp_server.py`) | 13 (`ops_find`, `ops_cross`, `ops_deep`, `ops_query`, `ops_tasks`, `ops_inbox`, `ops_health`, `ops_brief_ops`, `ops_sync`, `ops_faq`, `ops_fabric`, `ops_email_search`, `ops_write`) |
-| `query.py` shortcuts | 30 |
-| `task_manager.py` subcommands | 36 |
-| Skills (`skills/`) | 8 |
-| Install self-checks (`tools/selfcheck.py`) | 9 |
-| External services required to run | 0 (LLM keys and chat bridges are optional and connect one at a time) |
+| Sprints sourced for | 8 (a ninth in preparation), one fellowship alongside |
+| Candidates worked (distinct people, judge and speaker searches) | 568 |
+| Confirmed judges | 250 |
+| Confirmed speakers | 81 |
+| Acceptance rate, per search | 32% to 75% |
+| Judges who delivered their reviews, per search | 82% to 94% |
+| Average days from first contact to confirmation, per search | 2.7 to 6.0 |
+| Organisations represented among confirmed judges, on record | 43 (a floor; the graph has an organisation edge for 59 of the 250) |
+| Vetting time per candidate | 15 to 20 minutes |
+| Wrong-person rate caught in one scraped cold list, before verification became mandatory | 9 of 44 (20%) |
+| Submissions pre-screened with a rubric and two model families | 754 |
+| Rubric scoring validated against human reviews | 121 projects; rank correlation 0.43 for the better model, 0.21 for the weaker, 0.57 between the two |
+| Assignments produced by the solver across three sprints | 1,732; largest run 770 assignments over 104 reviewers, zero conflicts, zero uncovered items |
+| Partner, co-organiser, funder and sponsor organisations | 40 |
+| Local hubs and venues | 16 hubs, 41 venues in 34 cities |
+| Submitted projects and reviews recorded | 1,023 projects, 1,913 reviews |
 
-Largest modules: `tasks/task_manager.py` 3,021 lines, `brief/brief.py` 2,911, `hooks/session_lifecycle.py` 1,544, `tools/query.py` 1,374, `comms/inbox_triage.py` 1,311, `core/mcp_server.py` 1,177.
+What these numbers are not: a participant count (signups are not stored per event in the database the way judges are), or a claim that every confirmed judge was new to the field. The section on counterfactual value below says what is measured and what is not.
 
-## Quick start
+## Run it
 
-Python 3.12 or newer. Tested on Windows; the code uses `pathlib` throughout and has no Windows-only dependency that I know of, but it has only ever run on one machine.
+Python 3.12 or newer. Everything runs offline on fictional data; no key is needed for anything below.
 
 ```
 git clone https://github.com/kamil-blip/ops-kit
 cd ops-kit
-python -m venv .venv
-.venv\Scripts\activate            # source .venv/bin/activate on macOS and Linux
+python -m venv .venv && .venv\Scripts\activate     # source .venv/bin/activate on macOS and Linux
 pip install -r requirements.txt
-python scripts/setup_paths.py     # prints: wrote ...ops-kit.pth, import check: paths.ROOT=..., OK
-python db/init_db.py              # prints: init complete: both databases empty and healthy.
-python tools/selfcheck.py         # prints: selfcheck: 9/9 passed
+
+python pipeline/demo.py                # two fictional searches, 30 candidates walked through the states, funnel + chase + reconcile
+python screening/score.py --rubric screening/rubrics/example-ops-generalist-role.json --records screening/examples/candidates.json
+python screening/assign.py --demo      # 40 fictional items, 12 fictional reviewers, solved with coverage and conflict constraints
+python screening/validate.py --synthetic
+python screening/bias.py --demo
+
+python scripts/setup_paths.py && python db/init_db.py && python examples/sourcing/run_demo.py
+                                       # the same search on the full database: candidates written through the
+                                       # provenance-stamped write path, shortlist with evidence, feedback stored as a learning
+python tools/selfcheck.py              # nine install checks
+pytest -q                              # 60 tests
 ```
 
-Then copy `config.example.toml` to `config.toml`, fill in your name, timezone and email addresses, and wire the hooks and the MCP server into your Claude Code settings. [INSTALL.md](INSTALL.md) has every step with its expected output; it is written so that your own Claude Code can execute it top to bottom and know when a step failed.
+Real output of each command is in the docs and READMEs next to it.
 
-## A first session
+## How a search runs
 
-On an empty database, these are the commands and what they print.
+1. **Brief.** The research lead writes what the sprint needs per track. I ask the same questions a headhunter asks a hiring manager: what does a strong reviewer for this track look like, who must not be on it, how many do we need, by when.
+2. **Profile.** One ideal profile per track: seniority tier (senior, mid, junior, each mapped to what they can be assigned), the signals that indicate track fit, where such people are found (past judges, co-organiser referrals, hub organisers, inbound mail, cold lists), and exclusions. `docs/profiles.md`.
+3. **Leads.** The database is searched against the profile. A scorer applies the rubric and attaches a verbatim evidence quote to every criterion score; anything the scorer cannot quote, it cannot score. The list comes back ranked. Must-haves are gates and fail loudly; nice-to-haves are points.
+4. **Vetting.** 15 to 20 minutes per lead against `docs/vetting-guide.md`. The guide is specific about where the signal is: for AI safety researchers, LinkedIn is weak; a MATS page, a personal site, the Alignment Forum or Scholar is where the evidence sits. Identity and email are verified per person before any cold wave, because a scraped list once matched the wrong individual in 9 of 44 rows.
+5. **Outreach.** Templates rendered per person, linted for unresolved placeholders and banned phrases. Recruit two to three times the number needed; expect a third to half to decline. The rules learned from failures are in `docs/outreach.md`, each with when, then and because.
+6. **Tracking.** Every reply moves the candidate's state; illegal transitions are refused by a trigger. The tracker lists who needs a follow-up, who is in the dead zone, and who confirmed but has not delivered. An acceptance is not a confirmed candidate until the row exists. `docs/states.md`.
+7. **Feedback.** Delivery and completion per search go back into the profile, and the research lead's comments on the list are stored as learnings the assistant surfaces on the next similar brief.
 
-```
-$ python tools/query.py schema
-_audit_context (0): id, actor, source_ref, set_at
-_table_descriptions (0): table_name, tier, description, when_to_query, key_columns, ...
-... (224 lines: every table and virtual table with its row count and columns)
+## Rubrics, scoring and validation
 
-$ python tools/query.py "SELECT COUNT(*) FROM people"
-COUNT(*)
-0
-(1 rows)
+A rubric is criteria with weights; must-haves are gates, nice-to-haves are points; each criterion score requires an evidence quote; the composite is computed in code, never by the model. Two fictional rubrics ship: one for matching people to a technical research track, one for a generalist operations search with financial and HR systems ownership as gates. `screening/prompt.md` is the scoring prompt with the reason for each rule, including a pre-check for instruction-like text inside a record. `docs/rubrics.md` is the 15-minute method for turning a brief into a rubric and the failure modes to watch (keyword density scored as competence, drift across model versions, self-preference for model-styled text).
 
-$ python tools/query.py learnings "install"
-No active learnings match 'install'.
+The scorer was not trusted until it was measured. Method in `docs/validation.md`: score a set that humans have already reviewed, compute rank correlation and mean absolute error per model, compute agreement between two model families, look at cost per item, and decide what the scores may be used for. On the source system the better model reached a rank correlation of 0.43 with human reviewers on 121 projects, the weaker 0.21, and the two models agreed with each other at 0.57 (0.71 on a second event). The decision that followed: scores are used to match work to reviewers, never to pick winners. `screening/validate.py --synthetic` runs the same analysis on generated data so the method is visible without the data.
 
-$ python tools/query.py dossier "Jane Doe"
-No person found for 'Jane Doe'.
+## Assignment
 
-$ python tools/query.py health
-=== System Health (Aug 29, 23:12 UTC) ===
-SYNC FRESHNESS (target: <24h)
-  emails            :      ?  UNKNOWN
-  discord           :      ?  UNKNOWN
-  ... (empty sections are normal on day one)
-```
+Once a reviewer pool is confirmed, matching reviewers to items is a constrained optimisation, not a spreadsheet. `screening/assign.py` is a mixed-integer linear programme (scipy, HiGHS) with coverage floors per item, load bands per reviewer, at least one senior track-capable reviewer on every item, and hard conflict-of-interest exclusions. On the source system the largest run placed 770 assignments over 104 reviewers with zero conflicts and no uncovered items. `screening/bias.py` corrects for reviewer severity with paired comparisons and says in its docstring what it cannot correct (expertise).
 
-Connect one source in `config.toml`, run `python brief/daily_sync.py`, and the same commands start returning your own mail, contacts and threads. From there the loop is: morning `brief`, work inside Claude Code with the hooks capturing as you go, end the session with the `wrap-up` skill so the session log and learnings are written.
+## Where the leads come from, and what is counterfactual
 
-## How it is put together
+Every confirmed judge in the source system carries a `contacted_by` and a source. For 2026: 129 of the 250 were contacted by me directly; 20 came through a referral broker; 17 were captured automatically from inbound mail by the system; 12 came from local hub organisers; 5 from a partner programme's recommendations; 6 from the research lead. Signups are attributed by a fixed UTM scheme across 531 published posts, so the channel that brought a participant is known. `pipeline/funnel.py` prints the confirmed-by-source mix for every search.
 
-```
-db/          schema.sql, vec_schema.sql, init_db.py        the empty database and its initialiser
-core/        _db, paths, config, validators, audit_actor,  the spine every module imports
-             mcp_server
-tools/       query.py, selfcheck.py                        the CLI and the install check
-hooks/       11 wired hooks + slop_rules, slop_stats,      the Claude Code hook chain
-             pangram_check, settings.example.json
-search/      rrf_search, hybrid_search, person_dossier,    retrieval and the nine embedders
-             cross_search, surface_context, embed_*
-comms/       inbox_triage, faq_gate, comms_monitor,        triage, drafting for review, the steward
-             steward_bus, steward_ledger, steward_resolver
-brief/       brief.py, daily_sync, adapters               ingestion and the morning brief
-tasks/       task_manager, stakeholder, next_moves        tasks and urgency
-learning/    capture, retrieval, health, graduated_rules   the learning loop
-autonomy/    nightly, tick, health_runbook, drift_check,   scheduled maintenance and recovery
-             backup, restore_drill, retention_pack
-memory/      MEMORY.md convention, memory_lifecycle        the assistant's cross-session memory
-logging/     import_session, backfill_episodes, audit      session transcripts into the database
-skills/      8 generic Claude Code skills                  wrap-up, daily-debrief, knowledge-ops, ...
-interfaces/  whatsapp_bridge, transcribe                   optional chat bridge and voice notes
-```
+What is measured: conversion and completion per search, per source, per channel. What is not measured yet, and would be the first thing I would build for a sourcing team: a metric for the value of a new lead or a new data source, the counterfactual question. Which confirmed judges would not have been reached through the existing pool; which participants would not have found the sprint, or the field, otherwise. The attribution is in the tables; the metric on top of it is not. Judges from 43 organisations on record, including several frontier labs and safety organisations, is a coverage statement, not a counterfactual one, and I would not present it as more than that.
 
-Data flow, in one line: adapters write raw rows; the steward promotes facts with provenance; search indexes them; hooks surface them to the assistant; the assistant writes back through the MCP write tool or the steward; the nightly job keeps the whole thing healthy.
+## Data provenance, consent and acceptable use
 
-## The same shape as a talent-sourcing product
+The question a talent database has to be able to answer for any source: where did this come from, how are we allowed to use it, and would we be comfortable explaining that use to the person concerned. `docs/data-handling.md` is how this system answers it: every canonical fact carries an actor and a source reference (`comms/steward_bus.py`, `audit_events`); facts a person stated about themselves are marked as such; an identifier denylist and an embedding quarantine keep people who should not be searchable out of search; contributed content is anonymised by default; personal messaging accounts are excluded from ingestion; and nothing about a person goes into a public post unless the person supplied it. It also records the one live case where a consent question was raised on a talent pipeline by a partner's advisor, and what changed as a result, and it lists the three things still missing.
 
-I am sharing this repository with the headhunting team at 80,000 Hours as part of an application, so it is worth saying plainly where it overlaps with what they run and where it does not.
+## The infrastructure underneath
 
-Their job descriptions (August 2026) describe the product like this: a hiring manager describes a role in a 15 to 30 minute call; Claude skills generate and adjust a rubric for candidate fit; an AI system searches a database of 16,000+ candidates and returns the top 100 to 300 leads; a headhunter filters those down to the ones worth sending; the hiring manager's feedback on the list feeds the next rubric. The Talent Database Lead posting adds the data side: grow the database, collect richer signals than a CV, and hold to a standard for responsible data use ("where did this come from, how are we allowed to use this data, and would we be comfortable explaining that use to the person concerned?").
+The funnel above runs on a single-operator system driven by Claude Code, included here so that the demos run on the real tables rather than on mocks.
 
-The kit is the same pipeline with the domain removed. The mapping, component by component:
-
-| Their step | What the kit has | Where |
+| Layer | What it is | Where |
 |---|---|---|
-| A candidate database, 16,000+ people | A people table with identity resolution (`person_emails`, `person_identities`, `person_identifiers`), typed attributes with source pointers, and a graph of people, organisations and relations with valid-from and valid-until dates | `db/schema.sql`: `people`, `attributes`, `entities`, `edges` |
-| Richer signals than a CV | Observations captured from every tool output as you work (`hooks/people_manager.py`), episodes embedded for semantic search, a per-person dossier that assembles identities, relations, threads and open items in one call | `hooks/people_manager.py`, `search/person_dossier.py` |
-| Rubrics as Claude skills | The same skill format (`SKILL.md` plus references), loaded on demand; the kit ships the generic ones and the pattern for a per-role rubric skill | `skills/` |
-| Search the database for a brief | Keyword, vector and graph signals fused by reciprocal-rank fusion; cross-table search; a "who knows this organisation" graph walk | `search/rrf_search.py`, `search/hybrid_search.py`, `tools/query.py whoknows` |
-| A human filters the list; nothing goes out automatically | Draft-first is enforced in code; the MCP write tool is confirm-gated; the steward bus is the only canonical write path | `comms/steward_bus.py`, `core/mcp_server.py` (`ops_write`) |
-| Hiring-manager feedback improves the next search | The learning loop: feedback becomes a rule row with a lifecycle and spaced-repetition scheduling, surfaced on every prompt where it applies; draft-versus-final diffs are recorded for every reply a person edited | `learning/`, `comms_draft_outcomes` |
-| Where did this come from, and are we allowed to use it | Every canonical fact carries an actor and a source reference; audit events on every write; an identifier denylist and a quarantine table for embeddings of people who should not be searchable | `audit_events`, `_audit_context`, `identifier_denylist`, `vec_entities_quarantine` |
-| Growing the database from new sources | Adapters for mail, Discord, Beeper (Slack, Signal, WhatsApp), calendar and meeting notes, with sync state and ingest rejections recorded per source | `brief/`, `sync_state`, `ingest_rejections` |
+| Database | One SQLite file, 88 tables, 27 full-text indexes, 9 vector tables, 129 triggers; created empty by `db/init_db.py` | `db/`, `core/` |
+| Ingestion | Adapters that pull mail, Discord, Slack and Signal, calendar and meeting notes into the database, with sync state and ingest rejections per source | `brief/` |
+| Search | Keyword, vector and graph signals fused with reciprocal-rank fusion; per-person dossiers; "who knows this organisation" graph walks | `search/`, `tools/query.py` (30 shortcuts) |
+| Write path | The steward bus: validate, resolve identity, upsert idempotently, stamp actor and source; unattributed writes rejected | `comms/steward_*.py`, `core/audit_actor.py` |
+| Assistant interface | 11 Claude Code hooks (session logging, learnings injected per prompt, a write guard, outbound text gates) and a 13-tool MCP server | `hooks/`, `core/mcp_server.py` |
+| Learning loop | Rules with a lifecycle and spaced repetition, harvested at the end of every session, surfaced when they apply | `learning/`, `memory/` |
+| Tasks and triage | Urgency by stakeholder and stage, a daily plan, subtasks; inbox lanes with response targets | `tasks/`, `comms/inbox_triage.py` |
+| Durability | Nightly job, health runbook, drift detection, backup and restore drill, retention; a nine-step selfcheck | `autonomy/`, `tools/selfcheck.py` |
 
-What the kit does not have, and what the source system has that did not ship: a scoring step that applies a rubric to each candidate and writes a ranked list with per-criterion evidence. In the source system that exists as an LLM pre-screening layer, validated against human reviews before it was trusted, and it was too tied to its domain to export. Building it on this kit is a skill plus one table, and it is the first thing I would add for a sourcing use.
+Design rules enforced in code rather than in a policy: one database and one write path; draft first, nothing sends; statistical checks warn, phrase and em-dash bans block; every failure becomes a written rule; hooks fail open; nothing secret in the tree.
 
 ## Tests
 
-```
-pytest -q
-```
-
-53 tests in `tests/`, run on every push by GitHub Actions on Ubuntu and Windows (Python 3.12). They build a fresh pair of databases from the shipped schemas in a temporary directory and pin behaviour, not smoke:
-
-- `test_schema.py`: the schema applies clean, starts at zero rows, its FTS shadow tables exist, the people index is trigger-fed, the context-link trigger fires only when the target entity exists, and the write gate refuses unattributed writes once `steward_config` sets it to blocking.
-- `test_steward.py`: a raw `people` write outside `actor_scope` is refused; inside it the CDC log records the actor; `steward_bus.write` promotes, stamps provenance, dedups on the natural key, and rejects unknown targets.
-- `test_quality_gate.py`: the hook run as Claude Code runs it (JSON on stdin): a banned phrase or an em dash in outbound text exits 2 and names the reason, clean text and non-outbound paths exit 0, and both hooks import the one shared ban list.
-- `test_slop_stats.py`: a plain factual message scores low; a cushioned email trips `reassurance` and `rationale-prose`; register detection and the short-text abstention.
-- `test_search.py`: FTS-fed reciprocal-rank fusion ranks the keyword match first, returns nothing on no match, sorts by score; the dossier handles unknown and known people.
-- `test_task_manager.py`: add, urgency ordering (P0 due tomorrow beats P3 open-ended), resolve, snooze and unsnooze against the focus list, and routing of untrusted sources to the inbox.
-- `test_learning_loop.py`: a captured rule is found by keyword, becomes always-on when graduated, is returned by retrieval, and renders with the `Rule:` prefix.
-- `test_selfcheck.py`: `tools/selfcheck.py` passes 9 of 9 against the temporary database and `init_db` refuses to clobber an initialised one.
-
-The vector arm of search needs `sentence-transformers`; CI installs without it and those paths are skipped, which the tests do on their own when the import is missing.
-
-## Design rules
-
-These are enforced in code, not in a policy document.
-
-1. One database, one write path. Anything canonical goes through the steward bus with an actor and a source. Unattributed writes are rejected.
-2. Draft first. No module sends email, chat or social. Drafts are produced for a person to send.
-3. Warn, do not block, on statistical checks. The phrase and em-dash bans block; the structural linter and the detector only report, because statistical tells false-positive on plain and non-native prose.
-4. Every failure becomes a rule. A mistake ends up as a learning row with when, then and because, and the hooks show it again when the situation recurs.
-5. Fail open in hooks. A bug in a hook must never block the assistant; hooks catch their own exceptions and say so.
-6. Nothing secret in the tree. Keys come from environment variables or the OS keyring under the `ops-kit` service; `config.toml`, `.env` and the databases are gitignored.
-
-## When not to use it
-
-- You want a hosted CRM or a team product. This is a single-operator, local-first system; there is no multi-user model and no server.
-- You do not use Claude Code. The hooks, skills and MCP server assume it. The database, search and task manager work without it, but that is half the value.
-- You want it to send things. It will not, by design. If you need automatic sending, you will be adding it yourself and removing a rule I would keep.
-- You need the ingestion adapters to work out of the box for your stack. They cover Gmail (via gmail-to-sqlite), Discord, Beeper (Slack, Signal, WhatsApp), Google Calendar and Granola meeting notes. Anything else is a new adapter.
-- You want a small dependency. It is 40,000 lines of Python. It was built to run one person's job end to end, not to be minimal.
+`pytest -q` runs 60 tests on a fresh temporary database: the schema applies and its triggers fire; the steward rejects unattributed writes and stamps attributed ones; the quality gate blocks banned phrases and em dashes; the structural linter flags cushioning and rationale prose; search ranks a keyword match first; the task manager scores urgency and hides snoozed items; a captured learning is retrieved and rendered; the selfcheck passes; and every sourcing and screening demo runs offline, twice, and resets. CI runs the suite on Ubuntu and Windows on every push.
 
 ## What is not here
 
-- No data. `db/init_db.py` creates the databases empty and the self-check confirms zero rows.
-- No credentials, and no place in the tree where one could sit.
-- None of the employer-specific tooling from the source system (event, judge, speaker and participant pipelines, one-off scripts, outreach content) and none of the people it holds. A few column names from that domain remain on `people` (`is_judge`, `is_speaker`, `hackathons_participated`, `prize_total`); they are unused flags here, harmless to rename or ignore.
-- No LLM claim-extraction layer. The source system runs two models over every new thread and gates their claims deterministically; that layer was too entangled with its data to ship. The stubs in `brief/` and `autonomy/` say so when reached and skip cleanly.
-
-## Status and limitations
-
-- Snapshot of a working system, exported August 2026 and re-verified from a clean virtual environment on 30 August 2026 (init, nine self-checks, the INSTALL steps as written, a privacy grep with zero hits).
-- Single machine, single operator, Windows. Paths are handled with `pathlib`, but nothing here has run on macOS or Linux yet.
-- Some modules are long (`task_manager.py` and `brief.py` are around 3,000 lines each) and lack a section map at the top. The nine `embed_*.py` scripts share boilerplate that belongs in `core/`. Both are known and listed in the audit notes rather than fixed.
-- The code and comments were written with Claude Code in the loop, as the system itself is; the design, the rules and the mistakes that produced them are mine.
+- No data. Every candidate, search, score and assignment in this repository is fictional and labelled as such. The databases are created empty.
+- No credentials. The optional model path in `screening/score.py` reads a key from the environment; there is no other place for one.
+- Not the employer's tooling as deployed: event names, people, templates as sent, and one-off scripts stayed where they belong. A few column names from that domain remain on `people` (`is_judge`, `is_speaker`, `hackathons_participated`, `prize_total`); they are unused flags here.
+- Not the model-based claim extraction layer of the source system (two models over every new thread, deterministic promotion gate); it was too tied to its data to ship. The stubs say so when reached.
 
 ## Origin and licence
 
-Carved out of a live production system, not written as a kit. Built by Kamil Alaa. MIT, see [LICENSE](LICENSE).
+Built by Kamil Alaa to run the hackathon programme at a research nonprofit from January 2026, alongside the job rather than as the job. Carved into this repository in August 2026 and re-verified from a clean environment on 30 August 2026. MIT, see [LICENSE](LICENSE).

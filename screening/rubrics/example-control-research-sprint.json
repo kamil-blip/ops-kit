@@ -1,0 +1,57 @@
+{
+  "name": "Reviewer fit for an AI control research sprint track (hypothetical)",
+  "brief": "A weekend research sprint with three technical tracks: control setting design (new evaluation environments for testing control protocols), control protocol design (monitors, defer-to-trusted strategies, auditing budgets) and red-teaming (attack policies that evade trusted monitors). Reviewers read 5 to 8 submissions each in the week after the event, score them on impact, execution and presentation, and write a short rationale. The panel needs people who have read control papers, not general ML seniority.",
+  "criteria": [
+    {
+      "id": "track_fit",
+      "name": "Direct experience in the track's research area",
+      "kind": "gate",
+      "description": "Published, built or worked on control, monitoring, evaluations or red-teaming of language-model agents. General machine-learning seniority does not pass this gate.",
+      "signals": ["ai control", "control protocol", "trusted monitor", "untrusted model", "monitoring", "evaluations", "evals", "red team", "red-team", "sabotage", "scheming", "agent safety", "control arena"]
+    },
+    {
+      "id": "availability",
+      "name": "Available for 2 to 3 hours in the review week",
+      "kind": "gate",
+      "description": "Stated availability for the week after the event. Over-committed candidates (several conferences the same week) fail this gate.",
+      "signals": ["available", "availability", "can review", "week after", "happy to review", "hours"]
+    },
+    {
+      "id": "seniority",
+      "name": "Seniority tier",
+      "kind": "points",
+      "weight": 1.5,
+      "description": "Senior (5+ years, leads work, established publications) can take the ambiguous submissions; mid (2 to 5 years, active researcher) takes standard technical evaluations; junior (PhD or early) takes focused technical assessments only.",
+      "signals": ["lead", "senior", "principal", "professor", "phd", "postdoc", "years", "published", "author"],
+      "anchors": {"5": "Senior: leads a research group or has a publication record in the area.", "3": "Mid: active researcher with specialised expertise.", "1": "Junior: specific technical skills, no evaluation experience yet."}
+    },
+    {
+      "id": "evaluation_experience",
+      "name": "Has evaluated other people's research before",
+      "kind": "points",
+      "weight": 1.0,
+      "description": "Peer review, programme committees, grant review, judging, mentoring research projects.",
+      "signals": ["reviewer", "peer review", "program committee", "programme committee", "judge", "judging", "mentor", "grant review", "area chair"],
+      "anchors": {"5": "Regular reviewer or committee member in the field.", "3": "Has reviewed a few times or mentored research.", "1": "No evidence; can be briefed."}
+    },
+    {
+      "id": "verification",
+      "name": "Identity and claims verified from a second source",
+      "kind": "points",
+      "weight": 1.0,
+      "description": "A personal site, scholar profile, lab page or alumni page confirms the claims. Weak LinkedIn presence is normal for safety researchers and is not evidence against.",
+      "signals": ["scholar", "personal site", "website", "lab page", "alumni", "alignment forum", "lesswrong", "arxiv", "github"],
+      "anchors": {"5": "Two independent sources confirm role and publications.", "3": "One source confirms.", "1": "Nothing found; request a CV before confirming."}
+    },
+    {
+      "id": "conflict_risk",
+      "name": "Low conflict-of-interest risk",
+      "kind": "points",
+      "weight": 0.5,
+      "description": "Not at the same organisation as several submitting teams, not a co-organiser's direct report. Score high when no overlap is visible.",
+      "signals": ["independent", "no conflict", "different organisation"],
+      "anchors": {"5": "No overlap with submitting organisations.", "3": "One possible overlap, handled by exclusion.", "1": "Same organisation as several teams."}
+    }
+  ],
+  "notes": "Keynote-tier people get a speaking invitation, not an asynchronous reviewing request; put them in a different pipeline. Never oversell the batch: a reviewer who withdraws over submission quality was a fit mistake on our side. Once a person is told they are on the panel, they are on the panel; control the assignment instead of retracting."
+}

@@ -16,8 +16,6 @@ user-invocable: false
 - Saving conversation-only context → don't persist it at all
 - Reading files for reference → just read them, no gatekeeper needed
 - Logging session changes → use `wrap-up` skill (changelog logging is hook-driven, no skill call needed)
-- Brainstorming a new subsystem, DB table, or hook pipeline → use `system-rebuild` (which calls back here for any memory/skill edits)
-- Writing a session entry to `system-build-status` → use `system-implement` Section 3
 
 ---
 

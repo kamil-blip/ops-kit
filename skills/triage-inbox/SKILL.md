@@ -9,7 +9,6 @@ description: Walk the operator through pending action_items_inbox proposals one 
 
 - The operator says "triage inbox", "review proposals", "clear the pending", "what's in the inbox queue"
 - After `brief.py sync` reports new inbox proposals
-- Weekly maintenance pass (weekend-maintenance Phase 2 includes an inbox-drain step that invokes this skill)
 
 ## Why this exists
 

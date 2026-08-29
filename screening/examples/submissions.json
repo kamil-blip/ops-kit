@@ -1,0 +1,27 @@
+[
+  {
+    "id": "rev-01",
+    "label": "Reviewer candidate 1 (fictional)",
+    "text": "Research scientist, four years, working on AI control protocols: trusted monitoring of untrusted models and defer-to-trusted strategies; two arXiv papers, one as first author. Personal site and Google Scholar profile list both. Has reviewed for one workshop. Available the week after the event, 3 hours. No connection to any submitting team that I can see."
+  },
+  {
+    "id": "rev-02",
+    "label": "Reviewer candidate 2 (fictional)",
+    "text": "Principal engineer at a large technology company, twelve years, leads a platform team of forty. Has not worked on AI safety but is a fast learner and comfortable with any topic. Available the week after the event."
+  },
+  {
+    "id": "rev-03",
+    "label": "Reviewer candidate 3 (fictional)",
+    "text": "PhD student, second year, thesis on red-teaming language-model agents and sabotage evaluations; one workshop paper, GitHub repository with the evaluation harness. Has mentored two undergraduate research projects. Available the week after the event, can take 5 or 6 submissions."
+  },
+  {
+    "id": "rev-04",
+    "label": "Reviewer candidate 4 (fictional)",
+    "text": "Professor of machine learning, area chair at a major conference, group of eight students, publications on monitoring and evaluations of agent systems. Travelling to two conferences the week after the event, could maybe look at one or two submissions the week after that."
+  },
+  {
+    "id": "rev-05",
+    "label": "Reviewer candidate 5 (fictional)",
+    "text": "Alignment researcher at a small lab, three years, works on scheming evaluations and control settings; lab page and Alignment Forum posts confirm. Regular reviewer for the lab's internal review process. Available, 2 to 3 hours in the review week. Two of the submitting teams are from the same lab."
+  }
+]

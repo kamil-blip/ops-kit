@@ -15,6 +15,7 @@ rapidfuzz>=3.6
 
 # Search / embeddings (search/embed_*.py, hybrid_search, rrf_search, faq gate)
 numpy>=1.26
+scipy>=1.11         # screening/assign.py (MILP via HiGHS)
 sentence-transformers>=3.0
 
 # Learning-loop spaced repetition (hooks/session_lifecycle.py auto-review;

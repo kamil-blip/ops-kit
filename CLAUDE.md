@@ -144,8 +144,6 @@ Two pillars (active systems):
 
 | Charter | Covers | Loads first | Hard line |
 |---------|--------|-------------|-----------|
-| COMMS | email drafts/replies, inbox work | `humanizer` | drafts only, never send unconfirmed |
-| SYSTEM | infra, schema, skills, pipelines, maintenance | `system-implement` / `system-rebuild` | zero outbound, backup first |
 | TRIAGE/BRIEF | morning brief, triage, day plan, wrap-up | `daily-debrief` / `wrap-up` | pure manager: route, never execute |
 
 Add your own charter rows as your domains emerge (e.g. a client-delivery or event-ops charter). Each row needs a "loads first" skill and one hard line.

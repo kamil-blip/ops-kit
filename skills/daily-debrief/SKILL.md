@@ -172,7 +172,6 @@ Do NOT batch-draft all replies. Instead:
 - Present the "needs reply" list
 - The operator picks one: "do AI-xxx"
 - Load thread context from the action item
-- Draft the reply in the operator's voice (load the `humanizer` skill and any comms-style rules you keep)
 - Show the draft, get explicit approval, only then send
 - Mark the item done, next
 

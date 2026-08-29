@@ -1,0 +1,66 @@
+{
+  "name": "Operations Associate, 15-person technical AI safety research organisation (hypothetical)",
+  "brief": "Full-time generalist operations role in London (visa sponsorship available, remote from abroad possible). Owns financial systems (bookkeeping, payroll) and HR systems (benefits, leave), organises the annual retreat, and automates recurring tasks with Airtable, Zapier or LLMs. Ideally 2 to 5 years of relevant experience, open to varied backgrounds if organised, detail-oriented, reliable and flexible. Interest in AI safety helpful but not required.",
+  "criteria": [
+    {
+      "id": "finance_ownership",
+      "name": "Has owned financial systems end to end",
+      "kind": "gate",
+      "description": "Bookkeeping or payroll was this person's responsibility, not a task they assisted with. Evidence: role title or bullet that names bookkeeping, payroll, month-end, accounts, invoicing as owned work.",
+      "signals": ["bookkeeping", "payroll", "month-end", "accounts payable", "accounts receivable", "invoicing", "finance systems", "financial systems", "ledger"]
+    },
+    {
+      "id": "hr_ownership",
+      "name": "Has owned HR systems end to end",
+      "kind": "gate",
+      "description": "Benefits, leave, onboarding or contracts were owned, not supported. Evidence: named ownership of an HR system or process.",
+      "signals": ["benefits", "leave", "onboarding", "hr system", "hris", "contracts", "people ops", "people operations"]
+    },
+    {
+      "id": "automation",
+      "name": "Automates recurring work with no-code tools or LLMs",
+      "kind": "points",
+      "weight": 2.0,
+      "description": "Built and maintained automations that other people relied on.",
+      "signals": ["airtable", "zapier", "make.com", "n8n", "automation", "automated", "llm", "claude", "gpt", "script"],
+      "anchors": {"5": "Built automations for several teams or clients that ran unattended for months.", "3": "Set up a few automations for own work.", "1": "No evidence of automation."}
+    },
+    {
+      "id": "events",
+      "name": "Has organised an in-person event for a team",
+      "kind": "points",
+      "weight": 1.0,
+      "description": "Retreats, offsites, conferences, workshops: venue, travel, budget, programme.",
+      "signals": ["retreat", "offsite", "conference", "workshop", "event", "venue", "logistics"],
+      "anchors": {"5": "Owned a multi-day event end to end with budget and travel.", "3": "Ran a one-day workshop or supported a larger event.", "1": "No evidence."}
+    },
+    {
+      "id": "reliability",
+      "name": "Organised, detail-oriented, reliable, flexible",
+      "kind": "points",
+      "weight": 1.5,
+      "description": "Concrete signals only: tenure in an ops role, systems that outlived them, documentation, compliance work, no gaps unexplained.",
+      "signals": ["compliance", "documentation", "sop", "process", "audit", "years", "team lead", "operations"],
+      "anchors": {"5": "Multi-year ops tenure with systems and documentation that others still use.", "3": "One ops role or adjacent responsibility.", "1": "No evidence."}
+    },
+    {
+      "id": "mission",
+      "name": "Interest in AI safety (helpful, not required)",
+      "kind": "points",
+      "weight": 0.5,
+      "description": "Read or engaged with the field; not a gate, and never traded against the gates.",
+      "signals": ["ai safety", "alignment", "biosecurity", "effective altruism", "governance", "superintelligence", "80,000 hours"],
+      "anchors": {"5": "Worked in or around the field.", "3": "Read into it or took a course.", "1": "No evidence, which is fine for this role."}
+    },
+    {
+      "id": "location",
+      "name": "London or willing to relocate; visa route exists",
+      "kind": "points",
+      "weight": 1.0,
+      "description": "Already in London scores highest; open to relocation with sponsorship scores mid; fully remote abroad scores low because the brief prefers London.",
+      "signals": ["london", "relocate", "relocation", "uk", "united kingdom", "open to moving"],
+      "anchors": {"5": "Based in London.", "3": "Open to moving to London.", "1": "Remote only."}
+    }
+  ],
+  "notes": "Read the brief as the hiring manager wrote it: the two gates come first in their list. Mission interest was marked helpful, not required, so it carries the lowest weight. A candidate who passes both gates with a 3 everywhere beats a candidate who fails one gate with 5s everywhere; that ordering is enforced by the scorer, not by the weights."
+}
