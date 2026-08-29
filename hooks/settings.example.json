@@ -1,0 +1,135 @@
+{
+  "_comment": [
+    "Example Claude Code hook chains for the ops-kit kit. Merge the 'hooks'",
+    "object below into your ~/.claude/settings.json (or project settings.json).",
+    "",
+    "Before use:",
+    "  1. Replace every $PYTHON with the absolute path to your venv's python",
+    "     executable (the one whose .pth file puts this repo's dirs on sys.path).",
+    "  2. Hook paths below are relative to this repo root. Claude Code resolves",
+    "     hook commands from the session's working directory, so either always",
+    "     start sessions in this repo or rewrite the paths as absolute.",
+    "  3. Replace <your-notion-server> with the name your Notion MCP server is",
+    "     registered under (drop that matcher block if you don't use Notion).",
+    "  4. The mcp__ops-mcp__* matcher assumes the kit's MCP server is registered",
+    "     as 'ops-mcp'. If you rename it, update the matcher AND set",
+    "     OPS_MCP_SERVER_NAME (or config.toml [mcp].server_name) to match.",
+    "",
+    "Deliberately NOT wired here (present in the system this kit was extracted",
+    "from, excluded from the starter): an event-runbook auto-detect hook, a",
+    "background queue-drain worker on SessionStart/Stop/SessionEnd, overnight",
+    "plan-run injector/stop-gate hooks, and a skill-invocation telemetry hook",
+    "(skill_invoked.py, not shipped). Add your own equivalents the same way."
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/safety_guard.py", "timeout": 5 },
+          { "type": "command", "command": "$PYTHON hooks/quality_gate.py", "timeout": 5 },
+          { "type": "command", "command": "$PYTHON hooks/output_manager.py", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/quality_gate.py", "timeout": 5 },
+          { "type": "command", "command": "$PYTHON hooks/output_manager.py", "timeout": 3 }
+        ]
+      },
+      {
+        "matcher": "mcp__<your-notion-server>__notion-update-page|mcp__<your-notion-server>__notion-create-pages|mcp__<your-notion-server>__notion-create-database|mcp__<your-notion-server>__notion-move-pages|mcp__<your-notion-server>__notion-duplicate-page|mcp__<your-notion-server>__notion-update-data-source",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/safety_guard.py", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "mcp__gmail__send_email|mcp__gmail__reply_to_email|mcp__gmail__reply_all|mcp__gmail__forward_email|mcp__gmail__draft_email|mcp__gmail__update_draft|mcp__gmail__send_draft",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/safety_guard.py", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "mcp__metricool__post_schedule_post|mcp__metricool__update_schedule_post",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/quality_gate.py", "timeout": 5 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Read|WebFetch|WebSearch|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/state_tracker.py", "timeout": 10, "async": true }
+        ]
+      },
+      {
+        "matcher": "Bash|WebFetch|WebSearch|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/people_manager.py", "timeout": 10, "async": true }
+        ]
+      },
+      {
+        "matcher": "Read|Bash|WebFetch|WebSearch|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/output_manager.py", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/auto_surface.py", "timeout": 10 }
+        ]
+      },
+      {
+        "matcher": "Bash|Read|WebFetch|WebSearch|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/injection_scanner.py", "timeout": 5 }
+        ]
+      },
+      {
+        "matcher": "Bash|mcp__ops-mcp__ops_query|mcp__ops-mcp__ops_write",
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/notes_to_edges.py", "timeout": 5, "async": true }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/context_injector.py", "timeout": 10 }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/session_lifecycle.py", "timeout": 15 }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/session_lifecycle.py", "timeout": 60 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/state_tracker.py", "timeout": 5 },
+          { "type": "command", "command": "$PYTHON hooks/session_lifecycle.py", "timeout": 15 }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$PYTHON hooks/session_lifecycle.py", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}

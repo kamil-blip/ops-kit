@@ -1,0 +1,103 @@
+# ops-kit configuration. Copy to config.toml and fill what you use.
+# Every section is OPTIONAL: leave a value blank (or delete the section) to
+# disable that integration. The system runs fully offline with everything blank.
+
+[operator]
+name = ""                 # your name, used in prompts and provenance stamps
+role = ""                 # e.g. "operations coordinator"
+timezone = "UTC"          # IANA name, e.g. "Africa/Cairo"
+emails = []               # every address that counts as YOU, e.g. ["me@example.org"]
+discord_user_id = ""      # your Discord user id (optional)
+display_name = ""         # label for your own messages in transcripts/chats
+
+[org]
+name = ""                 # your org's name (optional; used in classify prompts)
+domain = ""               # e.g. "example.org" -- outbound-detection for org mail
+email_aliases = []        # shared org addresses, e.g. ["team@example.org"]
+description = ""          # one line, for the classifier's context
+
+[contacts]
+vip = []                  # email addresses that get the VIP inbox lane
+manager_person_ids = []   # people.id values for your manager tier (fill later)
+manager_email_patterns = []  # e.g. ["boss@example"]
+manager_name_tokens = []  # lowercase first-name tokens, e.g. ["alexis"] (drives Tier 0/1 urgency)
+manager_title_tokens = [] # role titles that imply the manager, e.g. ["ceo"]
+
+[keys]
+# Precedence everywhere: environment variable, then OS keyring service below.
+keyring_service = "ops-kit"
+# expected keyring entries (create with `keyring set ops-kit <NAME>`):
+#   GEMINI_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY (any subset)
+#   discord_user_token (optional Discord DM sync)
+#   BEEPER_TOKEN (optional Beeper Desktop bridge)
+
+[sync]
+discord_guild_ids = []    # guilds to sync (optional)
+gmail_db_path = ""        # path to a gmail-to-sqlite messages.db (optional)
+notion_databases = {}     # id -> ["Human name", "type"] (optional)
+
+[paths]
+drafts_dir = ""           # where draft files land (default: <root>/data/drafts)
+
+[whatsapp]
+bridge_chat_id = ""       # your Beeper note-to-self chat id (optional bridge)
+
+[triage]
+# Inbox triage lanes (comms/inbox_triage.py). Every list defaults empty; an
+# unconfigured rule simply never fires and the classifier falls back to the
+# built-in generic sender-domain heuristics. Commented values are FICTIONAL
+# examples. The vip lane itself is driven by [contacts] vip above.
+# shared_inbox_groups = ["support@example.org", "info@example.org"]  # group aliases whose mail hides in Gmail's Forums tab
+shared_inbox_groups = []
+# delegated_groups = { "fellowship@example.org" = "program-owner" }  # group -> owner slug; their threads demote to low_signal
+delegated_groups = {}
+# delegated_escalation_keywords = ["payment", "invoice", "contract"] # subject words that pull a delegated thread back to you
+# vip_blast_prefixes = ["Checking in"]        # subject prefixes marking a VIP mass-send, not a personal note
+vip_blast_prefixes = []
+# blast_sender = "no-reply@example.org"       # org automation address for signup-confirmation blasts
+blast_sender = ""
+# blast_subject_prefixes = ["welcome aboard", "thank you for signing up"]
+blast_subject_prefixes = []
+# payment_humans = ["accounts@payvendor.example"]   # humans at your payment vendor (tier 1)
+payment_humans = []
+# payment_auto = ["jira@payvendor.example"]         # automated payment senders (tier 3)
+payment_auto = []
+# payment_vendor_names = ["payvendor"]        # display-name tokens marking vendor automation in group rewrites
+payment_vendor_names = []
+# partner_emails = ["contact@partnerorg.example"]
+partner_emails = []
+# partner_domains = ["partnerorg.example"]
+partner_domains = []
+# priority_roles = ["advisor", "reviewer", "mentor"]  # person_roles values -> collaborator lane (needs a person_roles table)
+priority_roles = []
+# general_roles = ["participant"]
+general_roles = []
+# Extra senders on top of the built-in generic lists:
+low_signal_domains = []
+calendar_domains = []
+auto_close_domains = []
+rewrite_automation_names = []
+# mention_tokens = ["@Jane"]                  # body mention that blocks auto-close (default: "@<first name>")
+mention_tokens = []
+imminent_window_days = 21                     # stage-boost window (needs an `events` table; optional)
+
+[stakeholder]
+# Vocabulary for tasks/stakeholder.py (urgency tiers). Every list defaults
+# empty: an unconfigured rule never fires and the item falls through to
+# Tier 4. Commented values are FICTIONAL examples. Manager identity lives in
+# [contacts] above (manager_person_ids / manager_email_patterns /
+# manager_name_tokens / manager_title_tokens).
+# partner_roles = ["advisor", "reviewer", "mentor"]   # roles-table values that mark a partner (config order = preference)
+partner_roles = []
+participant_roles = ["participant"]
+# partner_role_keywords = ["advisor", "panelist", "reviewer"]  # description keywords implying a partner
+partner_role_keywords = []
+# sponsor_phrases = ["official partner", "sponsorship", "co-organizer"]
+sponsor_phrases = []
+# sponsor_org_tokens = ["acme institute", "globex"]   # your partner-org names
+sponsor_org_tokens = []
+# internal_desc_hints = ["patch ", "audit ", "rebuild ", "regenerate", "investigate "]  # marks internal process work
+internal_desc_hints = []
+# Optional domain tables (feature-detected; neither ships with the kit):
+events_table = "events"        # columns: slug, start_date, end_date -> drives the event stage boost
+roles_table = "person_roles"   # columns: person_id, role -> drives the role-based partner tier

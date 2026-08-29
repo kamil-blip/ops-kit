@@ -1,0 +1,22 @@
+# environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# local data (the kit ships empty; your data never goes to git)
+data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+
+# local config and secrets
+config.toml
+.env
+*.pth
+
+# logs, scratch, archives
+*.log
+*.zip
+.pytest_cache/

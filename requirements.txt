@@ -1,0 +1,42 @@
+# ops-kit python dependencies (Python 3.12+)
+# Core
+sqlite-vec>=0.1.6
+keyring>=24.0
+requests>=2.31
+python-dateutil>=2.8
+
+# LLM providers (any subset; leave out what you don't use)
+google-genai>=1.0
+openai>=1.30
+anthropic>=0.34
+
+# Matching / ranking
+rapidfuzz>=3.6
+
+# Learning-loop spaced repetition (hooks/session_lifecycle.py auto-review;
+# degrades gracefully to no-op when absent)
+fsrs>=6.0
+
+# Off-session jobs (autonomy/): single-instance lock + nightly test step
+filelock>=3.13
+pytest>=8.0
+
+# MCP server
+mcp>=1.0,<2   # the server uses the 1.x low-level decorator API (Server.list_tools); 2.x changed it
+
+# Optional: voice-note transcription (interfaces/transcribe.py)
+# faster-whisper>=1.0
+
+# Optional: Gmail sync backend (brief/daily_sync.py shells out to it)
+# gmail-to-sqlite
+
+# Optional: Google Chat space sync (brief/brief.py sync_google_chat; skipped
+# when unconfigured, fails gracefully when these are absent)
+# google-api-python-client>=2.100
+# google-auth>=2.23
+# google-auth-oauthlib>=1.1
+
+# Optional: Granola encrypted token store (brief/granola_sync.py; newer
+# Granola builds encrypt stored-accounts.json. Without this the sync
+# falls back to the legacy plaintext store when present)
+# cryptography>=42.0
