@@ -1,0 +1,29 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install (without the embedding model stack; vector tests skip when absent)
+        shell: bash
+        run: |
+          python -c "lines=[l for l in open('requirements.txt') if not l.startswith('sentence-transformers')]; open('requirements-ci.txt','w').writelines(lines)"
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+      - name: Initialise the empty databases
+        run: python db/init_db.py
+      - name: Run the suite
+        run: pytest -q

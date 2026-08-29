@@ -1,5 +1,7 @@
 # ops-kit
 
+![tests](https://github.com/kamil-blip/ops-kit/actions/workflows/tests.yml/badge.svg)
+
 ops-kit is the infrastructure layer of a personal operations system driven by Claude Code: one SQLite database as the source of truth for people, mail, chat, tasks and notes; search across all of it; a hook chain that logs sessions, injects context and gates outbound text; an MCP server that exposes the database to the assistant as tools; and a learning loop that turns mistakes into rules the assistant sees on every turn. It ships empty. There is no data in this repository, only structure and code.
 
 I built the system it comes from in my own time, starting in March 2026, to run an operations job at a research nonprofit (events, judges, speakers, participants, five inboxes). This repository is the part that is not about that job. Everything specific to the employer stayed out; see [What is not here](#what-is-not-here).
@@ -12,6 +14,7 @@ I built the system it comes from in my own time, starting in March 2026, to run 
 - [A first session](#a-first-session)
 - [How it is put together](#how-it-is-put-together)
 - [The same shape as a talent-sourcing product](#the-same-shape-as-a-talent-sourcing-product)
+- [Tests](#tests)
 - [Design rules](#design-rules)
 - [When not to use it](#when-not-to-use-it)
 - [What is not here](#what-is-not-here)
@@ -151,6 +154,25 @@ The kit is the same pipeline with the domain removed. The mapping, component by 
 | Growing the database from new sources | Adapters for mail, Discord, Beeper (Slack, Signal, WhatsApp), calendar and meeting notes, with sync state and ingest rejections recorded per source | `brief/`, `sync_state`, `ingest_rejections` |
 
 What the kit does not have, and what the source system has that did not ship: a scoring step that applies a rubric to each candidate and writes a ranked list with per-criterion evidence. In the source system that exists as an LLM pre-screening layer, validated against human reviews before it was trusted, and it was too tied to its domain to export. Building it on this kit is a skill plus one table, and it is the first thing I would add for a sourcing use.
+
+## Tests
+
+```
+pytest -q
+```
+
+53 tests in `tests/`, run on every push by GitHub Actions on Ubuntu and Windows (Python 3.12). They build a fresh pair of databases from the shipped schemas in a temporary directory and pin behaviour, not smoke:
+
+- `test_schema.py`: the schema applies clean, starts at zero rows, its FTS shadow tables exist, the people index is trigger-fed, the context-link trigger fires only when the target entity exists, and the write gate refuses unattributed writes once `steward_config` sets it to blocking.
+- `test_steward.py`: a raw `people` write outside `actor_scope` is refused; inside it the CDC log records the actor; `steward_bus.write` promotes, stamps provenance, dedups on the natural key, and rejects unknown targets.
+- `test_quality_gate.py`: the hook run as Claude Code runs it (JSON on stdin): a banned phrase or an em dash in outbound text exits 2 and names the reason, clean text and non-outbound paths exit 0, and both hooks import the one shared ban list.
+- `test_slop_stats.py`: a plain factual message scores low; a cushioned email trips `reassurance` and `rationale-prose`; register detection and the short-text abstention.
+- `test_search.py`: FTS-fed reciprocal-rank fusion ranks the keyword match first, returns nothing on no match, sorts by score; the dossier handles unknown and known people.
+- `test_task_manager.py`: add, urgency ordering (P0 due tomorrow beats P3 open-ended), resolve, snooze and unsnooze against the focus list, and routing of untrusted sources to the inbox.
+- `test_learning_loop.py`: a captured rule is found by keyword, becomes always-on when graduated, is returned by retrieval, and renders with the `Rule:` prefix.
+- `test_selfcheck.py`: `tools/selfcheck.py` passes 9 of 9 against the temporary database and `init_db` refuses to clobber an initialised one.
+
+The vector arm of search needs `sentence-transformers`; CI installs without it and those paths are skipped, which the tests do on their own when the import is missing.
 
 ## Design rules
 

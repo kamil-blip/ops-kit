@@ -1,0 +1,91 @@
+{
+  "role": "Operations Lead, 12-person AI governance nonprofit, London (HYPOTHETICAL)",
+  "source_brief": "../brief.md",
+  "send_count": 2,
+  "gates": [
+    {
+      "id": "owned_bookkeeping_payroll",
+      "brief_quote": "Someone who has actually run payroll, not someone who has watched it.",
+      "attr": "owned_bookkeeping_payroll",
+      "pass_values": ["yes"],
+      "evaluable": true
+    },
+    {
+      "id": "owned_hr_systems",
+      "brief_quote": "has owned HR systems (benefits, leave) end to end",
+      "attr": "owned_hr_systems",
+      "pass_values": ["yes"],
+      "evaluable": true
+    },
+    {
+      "id": "uk_eligible",
+      "brief_quote": "based in the UK or willing to relocate (UK visa sponsorship available)",
+      "attr": "uk_eligibility",
+      "pass_values": ["based_in_uk", "willing_to_relocate"],
+      "evaluable": true
+    },
+    {
+      "id": "experience_range",
+      "brief_quote": "2 to 6 years of relevant experience",
+      "attr": "years_relevant_experience",
+      "numeric_range": [2, 6],
+      "evaluable": true
+    }
+  ],
+  "points": [
+    {
+      "id": "automation",
+      "brief_quote": "Automating the recurring work with Airtable, Zapier or an LLM tool.",
+      "attr": "automation_tools",
+      "scoring": "keyword",
+      "keywords": ["airtable", "zapier", "make", "llm", "claude", "gpt", "python"],
+      "per_hit": 1,
+      "weight": 4
+    },
+    {
+      "id": "offsite",
+      "brief_quote": "The annual team retreat (four days, 12 to 15 people)",
+      "attr": "organised_multiday_offsite",
+      "scoring": "value",
+      "value_points": {"yes": 3, "partial": 1},
+      "weight": 3
+    },
+    {
+      "id": "mission_interest",
+      "brief_quote": "interest in AI safety or governance",
+      "attr": "ai_safety_engagement",
+      "scoring": "value",
+      "value_points": {"active": 2, "some": 1, "none": 0},
+      "weight": 2
+    },
+    {
+      "id": "small_org",
+      "brief_quote": "experience at an organisation under 30 people",
+      "attr": "largest_org_size_owned",
+      "scoring": "value",
+      "value_points": {"under_30": 2, "30_to_100": 1, "over_100": 0},
+      "weight": 2
+    },
+    {
+      "id": "london",
+      "brief_quote": "London preferred, remote from the UK acceptable",
+      "attr": "uk_eligibility",
+      "scoring": "value",
+      "value_points": {"based_in_uk": 2, "willing_to_relocate": 1},
+      "weight": 2
+    },
+    {
+      "id": "reliability_signal",
+      "brief_quote": "organised, detail-oriented, reliable, calm under a deadline",
+      "attr": "observations",
+      "scoring": "keyword",
+      "keywords": ["on time", "no errors", "audit passed", "clean", "reliable", "closed the books"],
+      "per_hit": 1,
+      "weight": 2
+    }
+  ],
+  "max_points": 15,
+  "calibration_notes": [
+    "2026-08-30: first version, written from brief.md. No past-search calibration yet; treat the weights as a draft."
+  ]
+}

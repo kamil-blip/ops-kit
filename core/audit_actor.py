@@ -51,8 +51,13 @@ except ImportError:
 
 
 def set_actor(conn: sqlite3.Connection, actor: str, source_ref: str | None = None) -> None:
+    # Upsert: a fresh install ships _audit_context empty (zero rows by design),
+    # and a plain UPDATE on the missing singleton would silently attribute
+    # nothing. The row is created on first use and kept from then on.
     conn.execute(
-        "UPDATE _audit_context SET actor = ?, source_ref = ?, set_at = CURRENT_TIMESTAMP WHERE id = 1",
+        "INSERT INTO _audit_context (id, actor, source_ref, set_at) VALUES (1, ?, ?, CURRENT_TIMESTAMP) "
+        "ON CONFLICT(id) DO UPDATE SET actor = excluded.actor, source_ref = excluded.source_ref, "
+        "set_at = CURRENT_TIMESTAMP",
         (actor, source_ref),
     )
 
