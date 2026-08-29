@@ -28,6 +28,8 @@ _DATA = Path(tempfile.mkdtemp(prefix="ops-kit-tests-"))
 os.environ["OPS_ROOT"] = str(ROOT)
 os.environ["OPS_DATA_DIR"] = str(_DATA)
 os.environ["PYTHONIOENCODING"] = "utf-8"
+# Scripts run as subprocesses import core/ by name; make that work without the .pth
+os.environ["PYTHONPATH"] = os.pathsep.join(p for p in [str(ROOT / "core"), os.environ.get("PYTHONPATH", "")] if p)
 
 for _d in ("db", "core", "tools", "comms", "search", "tasks", "learning", "autonomy"):
     p = str(ROOT / _d)

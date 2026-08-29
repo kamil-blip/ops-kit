@@ -23,7 +23,9 @@ jobs:
           python -c "lines=[l for l in open('requirements.txt') if not l.startswith('sentence-transformers')]; open('requirements-ci.txt','w').writelines(lines)"
           python -m pip install --upgrade pip
           pip install -r requirements-ci.txt
-      - name: Initialise the empty databases
+      - name: Register the core path
+        run: python scripts/setup_paths.py
+      - name: Initialise empty databases
         run: python db/init_db.py
       - name: Run the suite
         run: pytest -q
