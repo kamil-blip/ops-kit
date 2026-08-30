@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-HOOKS = Path(__file__).resolve().parents[1] / "hooks"
+HOOKS = Path(__file__).resolve().parents[1] / "platform" / "hooks"
 
 
 @pytest.fixture(scope="module")

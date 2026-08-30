@@ -30,7 +30,7 @@ WHEN a third party sends candidates. THEN vet every one as if cold; check whethe
 WHEN about to nudge someone. THEN read the last message in their thread first. BECAUSE reminders have gone out to people who had already replied, and one apology went to someone who had never been dropped, because the check used a four-day window against a three-week-old acceptance. No date cap on the check; read the roles and the record.
 
 **One message, the human length.**
-WHEN writing any invite or nudge. THEN one history line (why them), the ask, two facts they need to decide, an easy out, and nothing that argues for the ask. BECAUSE the messages that get replies are the ones that read like a person wrote them in two minutes, and a reader who suspects a message was machine-written stops reading it as a message from you. `pipeline/templates.py` lints for the phrases that give that away.
+WHEN writing any invite or nudge. THEN one history line (why them), the ask, two facts they need to decide, an easy out, and nothing that argues for the ask. BECAUSE the messages that get replies are the ones that read like a person wrote them in two minutes, and a reader who suspects a message was machine-written stops reading it as a message from you. `sourcing/pipeline/templates.py` lints for the phrases that give that away.
 
 ## Cadence that works
 

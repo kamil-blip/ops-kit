@@ -10,7 +10,7 @@ OUTBOUND_PATH = "C:/work/outbound/reply.html"
 def _run_gate(py, env, repo_root, content, path=OUTBOUND_PATH, tool="Write"):
     payload = {"session_id": "pytest", "tool_name": tool,
                "tool_input": {"file_path": path, "content": content}}
-    return subprocess.run([py, str(repo_root / "hooks" / "quality_gate.py")],
+    return subprocess.run([py, str(repo_root / "platform" / "hooks" / "quality_gate.py")],
                           input=json.dumps(payload), capture_output=True, text=True, env=env, timeout=120)
 
 
@@ -46,7 +46,7 @@ def test_both_hooks_share_one_ban_list(py, env, repo_root):
             "import slop_rules, quality_gate, safety_guard; "
             "print(quality_gate.SLOP_BANNED is slop_rules.SLOP_BANNED and "
             "safety_guard.BANNED_PHRASES is slop_rules.SLOP_BANNED, len(slop_rules.SLOP_BANNED))"
-            % str(repo_root / "hooks"))
+            % str(repo_root / "platform" / "hooks"))
     r = subprocess.run([py, "-c", code], capture_output=True, text=True, env=env, timeout=120)
     assert r.returncode == 0, r.stderr
     flag, n = r.stdout.split()

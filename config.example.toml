@@ -43,7 +43,7 @@ drafts_dir = ""           # where draft files land (default: <root>/data/drafts)
 bridge_chat_id = ""       # your Beeper note-to-self chat id (optional bridge)
 
 [triage]
-# Inbox triage lanes (comms/inbox_triage.py). Every list defaults empty; an
+# Inbox triage lanes (platform/comms/inbox_triage.py). Every list defaults empty; an
 # unconfigured rule simply never fires and the classifier falls back to the
 # built-in generic sender-domain heuristics. Commented values are FICTIONAL
 # examples. The vip lane itself is driven by [contacts] vip above.
@@ -82,7 +82,7 @@ mention_tokens = []
 imminent_window_days = 21                     # stage-boost window (needs an `events` table; optional)
 
 [stakeholder]
-# Vocabulary for tasks/stakeholder.py (urgency tiers). Every list defaults
+# Vocabulary for platform/tasks/stakeholder.py (urgency tiers). Every list defaults
 # empty: an unconfigured rule never fires and the item falls through to
 # Tier 4. Commented values are FICTIONAL examples. Manager identity lives in
 # [contacts] above (manager_person_ids / manager_email_patterns /
@@ -103,5 +103,5 @@ events_table = "events"        # columns: slug, start_date, end_date -> drives t
 roles_table = "person_roles"   # columns: person_id, role -> drives the role-based partner tier
 
 [steward]
-# Frontier model used for judgment calls (comms/steward_brain.py). Must be a frontier model.
+# Frontier model used for judgment calls (platform/comms/steward_brain.py). Must be a frontier model.
 brain_model = "claude-opus-4-8"

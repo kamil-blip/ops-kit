@@ -12,7 +12,7 @@ def _tables(c):
 
 
 def test_schema_applies_and_integrity_ok(fresh_schema):
-    """db/schema.sql applies to an empty file and passes integrity_check."""
+    """platform/db/schema.sql applies to an empty file and passes integrity_check."""
     assert fresh_schema.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
     assert fresh_schema.execute("PRAGMA foreign_key_check").fetchall() == []
 

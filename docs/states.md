@@ -1,6 +1,6 @@
 # Candidate states
 
-One row in `candidate_roles` is one person in one search in one role, and each row is its own state machine. The allowed moves are defined once, in `pipeline/states.py`, copied into the `role_transitions` table by `init_db.py`, and enforced by a trigger: an update that is not in the table is refused by the database, not just by the code.
+One row in `candidate_roles` is one person in one search in one role, and each row is its own state machine. The allowed moves are defined once, in `sourcing/pipeline/states.py`, copied into the `role_transitions` table by `init_db.py`, and enforced by a trigger: an update that is not in the table is refused by the database, not just by the code.
 
 ## The diagram
 
@@ -17,7 +17,7 @@ prospect ──> contacted ──> sent ──┬──> interested ──┬─
     └──> removed ──> contacted
 ```
 
-Any reply state can also go straight to `confirmed` or `declined`; `sent` can return to `contacted` when a second channel is used. The full edge list is `python pipeline/states.py`.
+Any reply state can also go straight to `confirmed` or `declined`; `sent` can return to `contacted` when a second channel is used. The full edge list is `python sourcing/pipeline/states.py`.
 
 ## What each state means
 

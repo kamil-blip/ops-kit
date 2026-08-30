@@ -30,13 +30,13 @@ What happens between a track that needs judges, speakers and participants and th
 | Step | In this repository |
 |---|---|
 | What the track needs | Per track: the topic, the level of judge or participant it takes, how many, by when, who must not be involved |
-| **Profile per track** | Seniority tier, the signals that show track fit, where such people are found, exclusions (`docs/profiles.md`, `screening/rubrics/`) |
-| **Finding candidates** | From our own database (everyone who ever judged, spoke, mentored, submitted or signed up) and from online sources (fellowship alumni pages, personal sites, Scholar, the Alignment Forum, LinkedIn); a rubric scorer ranks them with an evidence quote per criterion (`search/`, `pipeline/verify.py`, `screening/score.py`) |
+| **Profile per track** | Seniority tier, the signals that show track fit, where such people are found, exclusions (`docs/profiles.md`, `sourcing/screening/rubrics/`) |
+| **Finding candidates** | From our own database (everyone who ever judged, spoke, mentored, submitted or signed up) and from online sources (fellowship alumni pages, personal sites, Scholar, the Alignment Forum, LinkedIn); a rubric scorer ranks them with an evidence quote per criterion (`platform/search/`, `sourcing/pipeline/verify.py`, `sourcing/screening/score.py`) |
 | Checking | Each candidate checked against the guide: track fit, availability, seniority, identity, red flags (`docs/vetting-guide.md`) |
-| **Contacting them** | Personalised invites to judge, speak or take part, with an interpolation lint and a banned-phrase check (`pipeline/templates.py`) |
-| Tracking | A state machine per candidate per search; who needs a follow-up, who confirmed but has not delivered (`pipeline/tracker.py`, `pipeline/funnel.py`) |
-| Feedback | Who delivered, who did not, and what the team saw in the reviews feed the next profile; the lessons become learnings (`learning/`, `examples/sourcing/feedback.py`) |
-| Assignment | Reviewers matched to work under coverage, load and conflict constraints (`screening/assign.py`) |
+| **Contacting them** | Personalised invites to judge, speak or take part, with an interpolation lint and a banned-phrase check (`sourcing/pipeline/templates.py`) |
+| Tracking | A state machine per candidate per search; who needs a follow-up, who confirmed but has not delivered (`sourcing/pipeline/tracker.py`, `sourcing/pipeline/funnel.py`) |
+| Feedback | Who delivered, who did not, and what the team saw in the reviews feed the next profile; the lessons become learnings (`platform/learning/`, `sourcing/demo/feedback.py`) |
+| Assignment | Reviewers matched to work under coverage, load and conflict constraints (`sourcing/screening/assign.py`) |
 
 ## What it produced, January to August 2026
 
@@ -72,20 +72,29 @@ cd ops-kit
 python -m venv .venv && .venv\Scripts\activate     # source .venv/bin/activate on macOS and Linux
 pip install -r requirements.txt
 
-python pipeline/demo.py                # two fictional searches, 30 candidates walked through the states, funnel + chase + reconcile
-python screening/score.py --rubric screening/rubrics/example-ops-generalist-role.json --records screening/examples/candidates.json
-python screening/assign.py --demo      # 40 fictional items, 12 fictional reviewers, solved with coverage and conflict constraints
-python screening/validate.py --synthetic
-python screening/bias.py --demo
+python sourcing/pipeline/demo.py                # two fictional searches, 30 candidates walked through the states, funnel + chase + reconcile
+python sourcing/screening/score.py --rubric sourcing/screening/rubrics/example-ops-generalist-role.json --records sourcing/screening/examples/candidates.json
+python sourcing/screening/assign.py --demo      # 40 fictional items, 12 fictional reviewers, solved with coverage and conflict constraints
+python sourcing/screening/validate.py --synthetic
+python sourcing/screening/bias.py --demo
 
-python scripts/setup_paths.py && python db/init_db.py && python examples/sourcing/run_demo.py
+python platform/scripts/setup_paths.py && python platform/db/init_db.py && python sourcing/demo/run_demo.py
                                        # the same search on the full database: candidates written through the
                                        # provenance-stamped write path, shortlist with evidence, feedback stored as a learning
-python tools/selfcheck.py              # nine install checks
+python platform/tools/selfcheck.py              # nine install checks
 pytest -q                              # 60 tests
 ```
 
 Real output of each command is in the docs and READMEs next to it.
+
+Layout:
+
+```
+sourcing/    pipeline/ (schema, states, tracker, templates, verify, funnel), screening/ (rubric, score, validate, assign, bias), demo/
+platform/    the system underneath: core, db, hooks, search, comms, brief, tasks, learning, autonomy, memory, tools, skills
+docs/        profiles, vetting-guide, outreach, states, rubrics, validation, data-handling
+tests/       60 pytest tests, run in CI on Ubuntu and Windows
+```
 
 ## How it runs for one event
 
@@ -99,23 +108,23 @@ Real output of each command is in the docs and READMEs next to it.
 
 ## Rubrics, scoring and validation
 
-A rubric is criteria with weights; must-haves are gates, nice-to-haves are points; each criterion score requires an evidence quote; the composite is computed in code, never by the model. Two fictional rubrics ship: one for matching people to a technical research track, one for a generalist operations search with financial and HR systems ownership as gates. `screening/prompt.md` is the scoring prompt with the reason for each rule, including a pre-check for instruction-like text inside a record. `docs/rubrics.md` is the 15-minute method for turning a brief into a rubric and the failure modes to watch (keyword density scored as competence, drift across model versions, self-preference for model-styled text).
+A rubric is criteria with weights; must-haves are gates, nice-to-haves are points; each criterion score requires an evidence quote; the composite is computed in code, never by the model. Two fictional rubrics ship: one for matching people to a technical research track, one for a generalist operations search with financial and HR systems ownership as gates. `sourcing/screening/prompt.md` is the scoring prompt with the reason for each rule, including a pre-check for instruction-like text inside a record. `docs/rubrics.md` is the 15-minute method for turning a brief into a rubric and the failure modes to watch (keyword density scored as competence, drift across model versions, self-preference for model-styled text).
 
-The scorer was not trusted until it was measured. Method in `docs/validation.md`: score a set that humans have already reviewed, compute rank correlation and mean absolute error per model, compute agreement between two model families, look at cost per item, and decide what the scores may be used for. On the source system the better model reached a rank correlation of 0.43 with human reviewers on 121 projects, the weaker 0.21, and the two models agreed with each other at 0.57 (0.71 on a second event). The decision that followed: scores are used to match work to reviewers, never to pick winners. `screening/validate.py --synthetic` runs the same analysis on generated data so the method is visible without the data.
+The scorer was not trusted until it was measured. Method in `docs/validation.md`: score a set that humans have already reviewed, compute rank correlation and mean absolute error per model, compute agreement between two model families, look at cost per item, and decide what the scores may be used for. On the source system the better model reached a rank correlation of 0.43 with human reviewers on 121 projects, the weaker 0.21, and the two models agreed with each other at 0.57 (0.71 on a second event). The decision that followed: scores are used to match work to reviewers, never to pick winners. `sourcing/screening/validate.py --synthetic` runs the same analysis on generated data so the method is visible without the data.
 
 ## Assignment
 
-Once a reviewer pool is confirmed, matching reviewers to items is a constrained optimisation, not a spreadsheet. `screening/assign.py` is a mixed-integer linear programme (scipy, HiGHS) with coverage floors per item, load bands per reviewer, at least one senior track-capable reviewer on every item, and hard conflict-of-interest exclusions. On the source system the largest run placed 770 assignments over 104 reviewers with zero conflicts and no uncovered items. `screening/bias.py` corrects for reviewer severity with paired comparisons and says in its docstring what it cannot correct (expertise).
+Once a reviewer pool is confirmed, matching reviewers to items is a constrained optimisation, not a spreadsheet. `sourcing/screening/assign.py` is a mixed-integer linear programme (scipy, HiGHS) with coverage floors per item, load bands per reviewer, at least one senior track-capable reviewer on every item, and hard conflict-of-interest exclusions. On the source system the largest run placed 770 assignments over 104 reviewers with zero conflicts and no uncovered items. `sourcing/screening/bias.py` corrects for reviewer severity with paired comparisons and says in its docstring what it cannot correct (expertise).
 
 ## Where the people come from, and what is counterfactual
 
-Every confirmed judge in the source system carries a `contacted_by` and a source. For 2026: 129 of the 250 were contacted by me directly; 20 came through a referral broker; 17 were captured automatically from inbound mail by the system; 12 came from local hub organisers; 5 from a partner programme's recommendations; 6 from the rest of the team. Signups are attributed by a fixed UTM scheme across 531 published posts, so the channel that brought a participant is known. `pipeline/funnel.py` prints the confirmed-by-source mix for every search.
+Every confirmed judge in the source system carries a `contacted_by` and a source. For 2026: 129 of the 250 were contacted by me directly; 20 came through a referral broker; 17 were captured automatically from inbound mail by the system; 12 came from local hub organisers; 5 from a partner programme's recommendations; 6 from the rest of the team. Signups are attributed by a fixed UTM scheme across 531 published posts, so the channel that brought a participant is known. `sourcing/pipeline/funnel.py` prints the confirmed-by-source mix for every search.
 
 What is measured: conversion and completion per search, per source, per channel. What is not measured yet: a metric for what a new source or a new contact was worth in outcomes, the counterfactual question. Which confirmed judges would not have been reached through the existing pool; which participants would not have found the sprint, or the field, otherwise. The attribution is in the tables; the metric on top of it is not. Judges from 43 organisations on record, including several frontier labs and safety organisations, is a coverage statement, not a counterfactual one, and I would not present it as more than that.
 
 ## Data provenance, consent and acceptable use
 
-For every record about a person the system should be able to say who gave us the fact, what that person agreed to, and whether we could tell them how it is used without embarrassment. `docs/data-handling.md` is how it does that: every canonical fact carries an actor and a source reference (`comms/steward_bus.py`, `audit_events`); facts a person stated about themselves are marked as such; an identifier denylist and an embedding quarantine keep people who should not be searchable out of search; contributed content is anonymised by default; personal messaging accounts are excluded from ingestion; and nothing about a person goes into a public post unless the person supplied it. It also records the one live case where a consent question was raised on a talent pipeline by a partner's advisor, and what changed as a result, and it lists the three things still missing.
+For every record about a person the system should be able to say who gave us the fact, what that person agreed to, and whether we could tell them how it is used without embarrassment. `docs/data-handling.md` is how it does that: every canonical fact carries an actor and a source reference (`platform/comms/steward_bus.py`, `audit_events`); facts a person stated about themselves are marked as such; an identifier denylist and an embedding quarantine keep people who should not be searchable out of search; contributed content is anonymised by default; personal messaging accounts are excluded from ingestion; and nothing about a person goes into a public post unless the person supplied it. It also records the one live case where a consent question was raised on a talent pipeline by a partner's advisor, and what changed as a result, and it lists the three things still missing.
 
 ## The infrastructure underneath
 
@@ -123,14 +132,14 @@ The funnel above runs on a single-operator system driven by Claude Code, include
 
 | Layer | What it is | Where |
 |---|---|---|
-| Database | One SQLite file, 88 tables, 27 full-text indexes, 9 vector tables, 129 triggers; created empty by `db/init_db.py` | `db/`, `core/` |
-| Ingestion | Adapters that pull mail, Discord, Slack and Signal, calendar and meeting notes into the database, with sync state and ingest rejections per source | `brief/` |
-| Search | Keyword, vector and graph signals fused with reciprocal-rank fusion; per-person dossiers; "who knows this organisation" graph walks | `search/`, `tools/query.py` (30 shortcuts) |
-| Write path | The steward bus: validate, resolve identity, upsert idempotently, stamp actor and source; unattributed writes rejected | `comms/steward_*.py`, `core/audit_actor.py` |
-| Assistant interface | 11 Claude Code hooks (session logging, learnings injected per prompt, a write guard, outbound text gates) and a 13-tool MCP server | `hooks/`, `core/mcp_server.py` |
-| Learning loop | Rules with a lifecycle and spaced repetition, harvested at the end of every session, surfaced when they apply | `learning/`, `memory/` |
-| Tasks and triage | Urgency by stakeholder and stage, a daily plan, subtasks; inbox lanes with response targets | `tasks/`, `comms/inbox_triage.py` |
-| Durability | Nightly job, health runbook, drift detection, backup and restore drill, retention; a nine-step selfcheck | `autonomy/`, `tools/selfcheck.py` |
+| Database | One SQLite file, 88 tables, 27 full-text indexes, 9 vector tables, 129 triggers; created empty by `platform/db/init_db.py` | `platform/db/`, `platform/core/` |
+| Ingestion | Adapters that pull mail, Discord, Slack and Signal, calendar and meeting notes into the database, with sync state and ingest rejections per source | `platform/brief/` |
+| Search | Keyword, vector and graph signals fused with reciprocal-rank fusion; per-person dossiers; "who knows this organisation" graph walks | `platform/search/`, `platform/tools/query.py` (30 shortcuts) |
+| Write path | The steward bus: validate, resolve identity, upsert idempotently, stamp actor and source; unattributed writes rejected | `platform/comms/steward_*.py`, `platform/core/audit_actor.py` |
+| Assistant interface | 11 Claude Code hooks (session logging, learnings injected per prompt, a write guard, outbound text gates) and a 13-tool MCP server | `platform/hooks/`, `platform/core/mcp_server.py` |
+| Learning loop | Rules with a lifecycle and spaced repetition, harvested at the end of every session, surfaced when they apply | `platform/learning/`, `platform/memory/` |
+| Tasks and triage | Urgency by stakeholder and stage, a daily plan, subtasks; inbox lanes with response targets | `platform/tasks/`, `platform/comms/inbox_triage.py` |
+| Durability | Nightly job, health runbook, drift detection, backup and restore drill, retention; a nine-step selfcheck | `platform/autonomy/`, `platform/tools/selfcheck.py` |
 
 Design rules enforced in code rather than in a policy: one database and one write path; draft first, nothing sends; statistical checks warn, phrase and em-dash bans block; every failure becomes a written rule; hooks fail open; nothing secret in the tree.
 
@@ -141,7 +150,7 @@ Design rules enforced in code rather than in a policy: one database and one writ
 ## What is not here
 
 - No data. Every candidate, search, score and assignment in this repository is fictional and labelled as such. The databases are created empty.
-- No credentials. The optional model path in `screening/score.py` reads a key from the environment; there is no other place for one.
+- No credentials. The optional model path in `sourcing/screening/score.py` reads a key from the environment; there is no other place for one.
 - Not the employer's tooling as deployed: event names, people, templates as sent, and one-off scripts stayed where they belong. A few column names from that domain remain on `people` (`is_judge`, `is_speaker`, `hackathons_participated`, `prize_total`); they are unused flags here.
 - Not the model-based claim extraction layer of the source system (two models over every new thread, deterministic promotion gate); it was too tied to its data to ship. The stubs say so when reached.
 

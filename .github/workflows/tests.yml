@@ -24,8 +24,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-ci.txt
       - name: Register the core path
-        run: python scripts/setup_paths.py
+        run: python platform/scripts/setup_paths.py
       - name: Initialise empty databases
-        run: python db/init_db.py
+        run: python platform/db/init_db.py
       - name: Run the suite
         run: pytest -q

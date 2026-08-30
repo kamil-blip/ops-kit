@@ -1,14 +1,14 @@
 """Shared fixtures: a temporary ops.db and vec.db built from the shipped schemas.
 
 The kit resolves its database path once, at import time, from the OPS_DATA_DIR
-environment variable (core/paths.py). So this file sets that variable to a
+environment variable (platform/core/paths.py). So this file sets that variable to a
 fresh temporary directory BEFORE any kit module is imported, then builds both
-databases there with the same functions db/init_db.py uses. Every test in the
+databases there with the same functions platform/db/init_db.py uses. Every test in the
 session runs against that pair of files; tests that need a pristine schema
 build their own copy with `fresh_schema`.
 
-The hooks directory is deliberately not put on sys.path: hooks/config.py and
-core/config.py share a module name. Hook tests run the hooks as subprocesses,
+The hooks directory is deliberately not put on sys.path: platform/hooks/config.py and
+platform/core/config.py share a module name. Hook tests run the hooks as subprocesses,
 which is how Claude Code runs them.
 """
 from __future__ import annotations
@@ -28,18 +28,18 @@ _DATA = Path(tempfile.mkdtemp(prefix="ops-kit-tests-"))
 os.environ["OPS_ROOT"] = str(ROOT)
 os.environ["OPS_DATA_DIR"] = str(_DATA)
 os.environ["PYTHONIOENCODING"] = "utf-8"
-# Scripts run as subprocesses import core/ by name; make that work without the .pth
-os.environ["PYTHONPATH"] = os.pathsep.join(p for p in [str(ROOT / "core"), os.environ.get("PYTHONPATH", "")] if p)
+# Scripts run as subprocesses import platform/core/ by name; make that work without the .pth
+os.environ["PYTHONPATH"] = os.pathsep.join(p for p in [str(ROOT / "platform" / "core"), os.environ.get("PYTHONPATH", "")] if p)
 
 for _d in ("db", "core", "tools", "comms", "search", "tasks", "learning", "autonomy"):
-    p = str(ROOT / _d)
+    p = str(ROOT / "platform" / _d)
     if p not in sys.path:
         sys.path.insert(0, p)
 
-import init_db  # noqa: E402  (db/init_db.py)
+import init_db  # noqa: E402  (platform/db/init_db.py)
 
-SCHEMA = ROOT / "db" / "schema.sql"
-VEC_SCHEMA = ROOT / "db" / "vec_schema.sql"
+SCHEMA = ROOT / "platform" / "db" / "schema.sql"
+VEC_SCHEMA = ROOT / "platform" / "db" / "vec_schema.sql"
 
 
 def build_databases(data_dir: Path) -> tuple[Path, Path]:
@@ -92,7 +92,7 @@ def conn(db_path):
 
 @pytest.fixture
 def fresh_schema(tmp_path):
-    """A brand-new ops.db built from db/schema.sql in an isolated directory."""
+    """A brand-new ops.db built from platform/db/schema.sql in an isolated directory."""
     ops = tmp_path / "ops.db"
     c = init_db.apply_sql(str(ops), str(SCHEMA))
     yield c

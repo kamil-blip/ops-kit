@@ -24,7 +24,7 @@ def learning(db_path):
 
 def test_query_cli_finds_learning_by_keyword(py, env, repo_root):
     """`query.py learnings <word>` returns the captured rule."""
-    r = subprocess.run([py, str(repo_root / "tools" / "query.py"), "learnings", "zebrafish"],
+    r = subprocess.run([py, str(repo_root / "platform" / "tools" / "query.py"), "learnings", "zebrafish"],
                        capture_output=True, text=True, env=env, timeout=120)
     assert r.returncode == 0, r.stderr
     assert "Zebrafish tanks" in r.stdout

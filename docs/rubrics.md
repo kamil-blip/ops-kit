@@ -12,7 +12,7 @@ A rubric is the contract between the person who described the role (or the track
 
 **Minute 12 to 15: decide what the composite does not decide.** Location, availability, seniority band and conflicts of interest are usually better as gates or as sort keys than as weighted points, because a hiring manager reads them as filters. Write the note at the bottom of the rubric that says which ordering the scorer enforces regardless of weights: a record that passes all gates with 3s beats a record that fails one gate with 5s.
 
-Save it as JSON (see `screening/rubrics/`). `screening/rubric.py` validates it and renders the prompt block; `screening/score.py` applies it.
+Save it as JSON (see `sourcing/screening/rubrics/`). `sourcing/screening/rubric.py` validates it and renders the prompt block; `sourcing/screening/score.py` applies it.
 
 ## Rules the code enforces
 
@@ -23,7 +23,7 @@ Save it as JSON (see `screening/rubrics/`). `screening/rubric.py` validates it a
 
 ## Calibrate before you trust it
 
-Run the rubric on records where the outcome is already known: past searches with the requester's feedback, past panels where the reviewers did or did not deliver, past cohorts where the selected people did or did not finish. Score them blind, then compare (`screening/validate.py`). What you learn is usually one of three things: a gate is too literal (it fails good records that used different words, so add signals), a points criterion has no signal (the model scores it at random, so drop it or rewrite the anchors), or the weights do not match what the requester acted on (so change the weights, not the scores).
+Run the rubric on records where the outcome is already known: past searches with the requester's feedback, past panels where the reviewers did or did not deliver, past cohorts where the selected people did or did not finish. Score them blind, then compare (`sourcing/screening/validate.py`). What you learn is usually one of three things: a gate is too literal (it fails good records that used different words, so add signals), a points criterion has no signal (the model scores it at random, so drop it or rewrite the anchors), or the weights do not match what the requester acted on (so change the weights, not the scores).
 
 Keep every rubric versioned. When the model changes, re-run the calibration set; scores drift across model versions even when the rubric does not.
 

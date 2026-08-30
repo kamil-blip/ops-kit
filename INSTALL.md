@@ -25,7 +25,7 @@ cd ops-kit
 python -m venv .venv
 .venv\Scripts\activate            # (Windows; on mac/linux: source .venv/bin/activate)
 pip install -r requirements.txt
-python scripts/setup_paths.py
+python platform/scripts/setup_paths.py
 ```
 
 CHECK: `setup_paths.py` prints `wrote ...ops-kit.pth`, then
@@ -34,7 +34,7 @@ CHECK: `setup_paths.py` prints `wrote ...ops-kit.pth`, then
 ## 3. Initialize the empty databases
 
 ```
-python db/init_db.py
+python platform/db/init_db.py
 ```
 
 CHECK: output ends with `init complete: both databases empty and healthy.`
@@ -57,10 +57,10 @@ your name (run from the repo root with the venv active).
 
 ## 5. Wire Claude Code (hooks + MCP)
 
-1. Open `hooks/settings.example.json`. Merge its `hooks` block into your
+1. Open `platform/hooks/settings.example.json`. Merge its `hooks` block into your
    Claude Code settings (`~/.claude/settings.json`), replacing `$PYTHON` with
    your venv's python path and the relative hook paths with absolute ones.
-2. Register the MCP server: add `core/mcp_server.py` as an MCP server named
+2. Register the MCP server: add `platform/core/mcp_server.py` as an MCP server named
    `ops-mcp` in your Claude Code MCP config, launched with the venv python.
 3. Set the environment variable `OPS_ROOT` to this directory (user-level env
    var), so hooks launched by Claude Code resolve paths without guessing.
@@ -75,7 +75,7 @@ CHECK 2: in that session, the `ops_find` MCP tool answers a probe like
 One command runs every check below and prints PASS/FAIL per step:
 
 ```
-python tools/selfcheck.py
+python platform/tools/selfcheck.py
 ```
 
 CHECK: ends with `selfcheck: 9/9 passed`, exit 0. Probe rows are cleaned up;
@@ -84,33 +84,33 @@ one backup file is left under `data/backups/`.
 The individual checks, if you want to run them by hand (repo root, venv
 active, expected results in brackets):
 
-1. `python tools/query.py schema` → [lists every table incl. FTS shadow tables
+1. `python platform/tools/query.py schema` → [lists every table incl. FTS shadow tables
    (about 220 lines on a fresh install), exits 0]
-2. `python tools/query.py "SELECT COUNT(*) FROM people"` → [0]
+2. `python platform/tools/query.py "SELECT COUNT(*) FROM people"` → [0]
 3. Memory round-trip: insert one `reference_docs` row and read it back through
-   `tools/query.py` → [the content comes back]
-4. Learning loop: `python learning/learning_capture.py --selftest` → [`SELFTEST PASS`]. The selftest rolls back its own test row, so insert one to confirm retrieval end to end:
-   `python tools/query.py "INSERT INTO learnings (learning_id, title, description, apply_when, priority, status, memory_type, source, inserted_at, updated_at) VALUES ('LRN-TEST-001','test','test learning','testword','low','active','operational','manual',datetime('now'),datetime('now'))"`
-   then `python tools/query.py learnings "testword"` → [that learning comes back].
-5. Health: `python tools/query.py health` (or
-   `python autonomy/health_runbook.py health`) → [prints a health summary;
+   `platform/tools/query.py` → [the content comes back]
+4. Learning loop: `python platform/learning/learning_capture.py --selftest` → [`SELFTEST PASS`]. The selftest rolls back its own test row, so insert one to confirm retrieval end to end:
+   `python platform/tools/query.py "INSERT INTO learnings (learning_id, title, description, apply_when, priority, status, memory_type, source, inserted_at, updated_at) VALUES ('LRN-TEST-001','test','test learning','testword','low','active','operational','manual',datetime('now'),datetime('now'))"`
+   then `python platform/tools/query.py learnings "testword"` → [that learning comes back].
+5. Health: `python platform/tools/query.py health` (or
+   `python platform/autonomy/health_runbook.py health`) → [prints a health summary;
    empty sections are normal on day 1]
-6. Backup + restore drill: `python -c "import sys; sys.path.insert(0,'core'); import _db, paths; print(_db.make_backup('install', db_path=paths.DB_PATH))"` prints the backup path,
-   then `python autonomy/restore_drill.py --backup <that path>` → [`restore-drill PASS`].
+6. Backup + restore drill: `python -c "import sys; sys.path.insert(0,'platform/core'); import _db, paths; print(_db.make_backup('install', db_path=paths.DB_PATH))"` prints the backup path,
+   then `python platform/autonomy/restore_drill.py --backup <that path>` → [`restore-drill PASS`].
 7. Wrap-up skill: end your Claude Code session with "wrap up" → [a
-   session_logs row exists: `python tools/query.py "SELECT COUNT(*) FROM
+   session_logs row exists: `python platform/tools/query.py "SELECT COUNT(*) FROM
    session_logs"` → 1+]
 
 ## 7. Day-to-day
 
 - **Feed it your life**: connect one source at a time in `config.toml` (start
-  with email or your chat bridge), then run `python brief/daily_sync.py` and
-  `python brief/brief.py sync`. Everything lands in `data/ops.db`.
+  with email or your chat bridge), then run `python platform/brief/daily_sync.py` and
+  `python platform/brief/brief.py sync`. Everything lands in `data/ops.db`.
 - **The loop**: morning → `brief.py gather` / your daily-debrief skill;
   during work → Claude Code with the hooks does capture automatically;
   end of session → the wrap-up skill logs everything and harvests learnings.
-- **Autonomy**: once comfortable, schedule `autonomy/off_session_nightly.py`
-  (daily) and `autonomy/off_session_tick.py` (every few minutes) with your OS
+- **Autonomy**: once comfortable, schedule `platform/autonomy/off_session_nightly.py`
+  (daily) and `platform/autonomy/off_session_tick.py` (every few minutes) with your OS
   scheduler. They maintain the DB, back it up, and drain queues while you sleep.
 - **Safety**: this kit never sends anything anywhere. Comms tooling stops at
   drafts for your review. Keep it that way.
