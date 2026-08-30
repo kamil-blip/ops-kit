@@ -25,7 +25,7 @@ This repository is the generic, data-free version of that machinery, plus the in
 
 ## The funnel
 
-What happens between "this sprint needs twelve judges who know AI control" and twelve reviews filed on time. Each row is one step and the module that does it.
+What happens between a track that needs judges, speakers and participants and the reviews filed on time. Each row is one step and the module that does it.
 
 | Step | In this repository |
 |---|---|
