@@ -2,7 +2,7 @@
 
 ![tests](https://github.com/kamil-blip/ops-kit/actions/workflows/tests.yml/badge.svg)
 
-ops-kit is the system I use to **find people for AI safety work and get them to show up**: the judges, speakers and participants of research hackathons. It is **a talent-sourcing funnel applied to field-building**. For every hackathon and every track, I **write an ideal candidate profile**, **source candidates against that profile** from a database and a rubric, **vet each one**, and **reach out to get them to participate**. Every state change is recorded, **conversion and delivery are measured per search**, and what the research lead says about the list changes the next profile.
+ops-kit is the system I use to **find people for AI safety work and get them to show up**: the judges, speakers and participants of research hackathons. For every hackathon and every track, **the profile of who is needed is set from what the track needs**, **candidates matching it are pulled from our database or found online**, **each one is checked**, and **they are contacted and brought in to take part**. Every state change is recorded, **how many say yes and how many deliver is measured per event**, and how the judging actually went changes the next profile.
 
 The goal behind it: **give mid-career and senior professionals a cheap first test of working on AI safety**. A weekend sprint with a real problem, real judges from the field and a real review is a lower bar than a fellowship or a job application, and for many people it is **the first time they engage with the field at all**. Sourcing is the machinery that decides who gets invited and makes sure they arrive.
 
@@ -13,10 +13,10 @@ This repository is the generic, data-free version of that machinery, plus the in
 - [The funnel](#the-funnel)
 - [What it produced, January to August 2026](#what-it-produced-january-to-august-2026)
 - [Run it](#run-it)
-- [How a search runs](#how-a-search-runs)
+- [How it runs for one event](#how-it-runs-for-one-event)
 - [Rubrics, scoring and validation](#rubrics-scoring-and-validation)
 - [Assignment](#assignment)
-- [Where the leads come from, and what is counterfactual](#where-the-leads-come-from-and-what-is-counterfactual)
+- [Where the people come from, and what is counterfactual](#where-the-people-come-from-and-what-is-counterfactual)
 - [Data provenance, consent and acceptable use](#data-provenance-consent-and-acceptable-use)
 - [The infrastructure underneath](#the-infrastructure-underneath)
 - [Tests](#tests)
@@ -25,17 +25,17 @@ This repository is the generic, data-free version of that machinery, plus the in
 
 ## The funnel
 
-Sourcing people for a hackathon has the same shape as sourcing candidates for a hire: a brief, a profile, a database, a ranked list, a human filter, outreach, tracking, feedback. This is the version in this repository.
+What happens between "this sprint needs twelve judges who know AI control" and twelve reviews filed on time. Each row is one step and the module that does it.
 
 | Step | In this repository |
 |---|---|
-| Brief | What a sprint and each track needs: topics, seniority, conflicts to avoid |
-| **Ideal candidate profile** | One per hackathon and per track: seniority tier, track-fit signals, where to look, exclusions (`docs/profiles.md`, `screening/rubrics/`) |
-| **Sourcing against the profile** | Database search plus a rubric scorer with an evidence quote per criterion (`search/`, `screening/score.py`) |
-| Vetting | Each lead checked against the guide: track fit, availability, seniority, identity, red flags (`docs/vetting-guide.md`, `pipeline/verify.py`) |
-| **Outreach** | Personalised invites with an interpolation lint and a banned-phrase check (`pipeline/templates.py`) |
+| What the track needs | Per track: the topic, the level of judge or participant it takes, how many, by when, who must not be involved |
+| **Profile per track** | Seniority tier, the signals that show track fit, where such people are found, exclusions (`docs/profiles.md`, `screening/rubrics/`) |
+| **Finding candidates** | From our own database (everyone who ever judged, spoke, mentored, submitted or signed up) and from online sources (fellowship alumni pages, personal sites, Scholar, the Alignment Forum, LinkedIn); a rubric scorer ranks them with an evidence quote per criterion (`search/`, `pipeline/verify.py`, `screening/score.py`) |
+| Checking | Each candidate checked against the guide: track fit, availability, seniority, identity, red flags (`docs/vetting-guide.md`) |
+| **Contacting them** | Personalised invites to judge, speak or take part, with an interpolation lint and a banned-phrase check (`pipeline/templates.py`) |
 | Tracking | A state machine per candidate per search; who needs a follow-up, who confirmed but has not delivered (`pipeline/tracker.py`, `pipeline/funnel.py`) |
-| Feedback | Delivery and completion per search feed the next profile; comments become learnings (`learning/`, `examples/sourcing/feedback.py`) |
+| Feedback | Who delivered, who did not, and what the team saw in the reviews feed the next profile; the lessons become learnings (`learning/`, `examples/sourcing/feedback.py`) |
 | Assignment | Reviewers matched to work under coverage, load and conflict constraints (`screening/assign.py`) |
 
 ## What it produced, January to August 2026
@@ -87,15 +87,15 @@ pytest -q                              # 60 tests
 
 Real output of each command is in the docs and READMEs next to it.
 
-## How a search runs
+## How it runs for one event
 
-1. **Brief.** The research lead writes what the sprint needs per track. I ask the same questions a recruiter asks a hiring manager: what does a strong reviewer or participant for this track look like, who must not be on it, how many do we need, by when.
-2. **Ideal candidate profile.** One per hackathon and per track, for judges, speakers and participants: seniority tier (senior, mid, junior, each mapped to what they can be assigned), the signals that indicate track fit, where such people are found (past judges, co-organiser referrals, hub organisers, inbound mail, cold lists, partner programmes), and exclusions. `docs/profiles.md`.
-3. **Sourcing candidates against the profile.** The database is searched against each profile. A scorer applies the rubric and attaches a verbatim evidence quote to every criterion score; anything the scorer cannot quote, it cannot score. The list comes back ranked. Must-haves are gates and fail loudly; nice-to-haves are points. This is the step that decides who gets invited to each hackathon.
-4. **Vetting.** Every lead is checked against `docs/vetting-guide.md`. The guide is specific about where the signal is: for AI safety researchers, LinkedIn is weak; a MATS page, a personal site, the Alignment Forum or Scholar is where the evidence sits. Identity and email are verified per person before any cold wave, because a scraped list once matched the wrong individual in 9 of 44 rows.
-5. **Outreach to get them to participate.** Templates rendered per person, linted for unresolved placeholders and banned phrases; history first, two bullets, one ask, an easy out. Recruit two to three times the number needed; expect a third to half to decline. The rules learned from failures are in `docs/outreach.md`, each with when, then and because.
-6. **Tracking.** Every reply moves the candidate's state; illegal transitions are refused by a trigger. The tracker lists who needs a follow-up, who is in the dead zone, and who confirmed but has not delivered. An acceptance is not a confirmed candidate until the row exists. `docs/states.md`.
-7. **Feedback.** Delivery and completion per search go back into the profile, and the research lead's comments on the list are stored as learnings the assistant surfaces on the next similar brief.
+1. **What the track needs.** Each hackathon has tracks, and each track sets the bar: the topic, what a judge has to be able to assess, what a participant needs to bring, how many of each, by when, and who must not be involved.
+2. **Profile per track.** From the track: the seniority tier (senior, mid, junior, each mapped to what they can be assigned), the signals that show track fit, where such people are found, and exclusions. `docs/profiles.md`.
+3. **Finding candidates.** Two sources. Our own database: everyone who has judged, spoken, mentored, submitted or signed up before, with identities resolved and their past delivery on record. Online: fellowship alumni pages, personal sites, Scholar, the Alignment Forum, LinkedIn, and referrals from co-organisers and hub organisers. A scorer applies the track's rubric to each candidate and attaches a verbatim evidence quote to every criterion; anything it cannot quote, it cannot score. Must-haves are gates and fail loudly; nice-to-haves are points. This is the step that decides who gets invited.
+4. **Checking.** Each candidate against `docs/vetting-guide.md`: track fit, availability, seniority, identity and email, red flags. For AI safety researchers LinkedIn is weak; the evidence sits on a fellowship page, a personal site, the Alignment Forum or Scholar. Identity and email are verified per person before any cold outreach, because a scraped list once matched the wrong individual in 9 of 44 rows.
+5. **Contacting them.** Invites rendered per person and linted for unresolved placeholders and banned phrases; history first, two bullets, one ask, an easy out. Recruit two to three times the number needed; expect a third to half to decline. The rules learned from failures are in `docs/outreach.md`, each with when, then and because.
+6. **Tracking.** Every reply moves the candidate's state; illegal transitions are refused by a trigger. The tracker lists who needs a follow-up, who has gone quiet, and who confirmed but has not delivered. An acceptance is not a confirmed judge until the row exists. `docs/states.md`.
+7. **Feedback.** Who delivered, how many reviews came in, which judges the team would invite again, and what went wrong go back into the next profile, and are stored as learnings the assistant surfaces the next time a similar track comes up.
 
 ## Rubrics, scoring and validation
 
@@ -107,15 +107,15 @@ The scorer was not trusted until it was measured. Method in `docs/validation.md`
 
 Once a reviewer pool is confirmed, matching reviewers to items is a constrained optimisation, not a spreadsheet. `screening/assign.py` is a mixed-integer linear programme (scipy, HiGHS) with coverage floors per item, load bands per reviewer, at least one senior track-capable reviewer on every item, and hard conflict-of-interest exclusions. On the source system the largest run placed 770 assignments over 104 reviewers with zero conflicts and no uncovered items. `screening/bias.py` corrects for reviewer severity with paired comparisons and says in its docstring what it cannot correct (expertise).
 
-## Where the leads come from, and what is counterfactual
+## Where the people come from, and what is counterfactual
 
-Every confirmed judge in the source system carries a `contacted_by` and a source. For 2026: 129 of the 250 were contacted by me directly; 20 came through a referral broker; 17 were captured automatically from inbound mail by the system; 12 came from local hub organisers; 5 from a partner programme's recommendations; 6 from the research lead. Signups are attributed by a fixed UTM scheme across 531 published posts, so the channel that brought a participant is known. `pipeline/funnel.py` prints the confirmed-by-source mix for every search.
+Every confirmed judge in the source system carries a `contacted_by` and a source. For 2026: 129 of the 250 were contacted by me directly; 20 came through a referral broker; 17 were captured automatically from inbound mail by the system; 12 came from local hub organisers; 5 from a partner programme's recommendations; 6 from the rest of the team. Signups are attributed by a fixed UTM scheme across 531 published posts, so the channel that brought a participant is known. `pipeline/funnel.py` prints the confirmed-by-source mix for every search.
 
-What is measured: conversion and completion per search, per source, per channel. What is not measured yet, and would be the first thing I would build for a sourcing team: a metric for the value of a new lead or a new data source, the counterfactual question. Which confirmed judges would not have been reached through the existing pool; which participants would not have found the sprint, or the field, otherwise. The attribution is in the tables; the metric on top of it is not. Judges from 43 organisations on record, including several frontier labs and safety organisations, is a coverage statement, not a counterfactual one, and I would not present it as more than that.
+What is measured: conversion and completion per search, per source, per channel. What is not measured yet: a metric for what a new source or a new contact was worth in outcomes, the counterfactual question. Which confirmed judges would not have been reached through the existing pool; which participants would not have found the sprint, or the field, otherwise. The attribution is in the tables; the metric on top of it is not. Judges from 43 organisations on record, including several frontier labs and safety organisations, is a coverage statement, not a counterfactual one, and I would not present it as more than that.
 
 ## Data provenance, consent and acceptable use
 
-The question a talent database has to be able to answer for any source: where did this come from, how are we allowed to use it, and would we be comfortable explaining that use to the person concerned. `docs/data-handling.md` is how this system answers it: every canonical fact carries an actor and a source reference (`comms/steward_bus.py`, `audit_events`); facts a person stated about themselves are marked as such; an identifier denylist and an embedding quarantine keep people who should not be searchable out of search; contributed content is anonymised by default; personal messaging accounts are excluded from ingestion; and nothing about a person goes into a public post unless the person supplied it. It also records the one live case where a consent question was raised on a talent pipeline by a partner's advisor, and what changed as a result, and it lists the three things still missing.
+For every record about a person the system should be able to say who gave us the fact, what that person agreed to, and whether we could tell them how it is used without embarrassment. `docs/data-handling.md` is how it does that: every canonical fact carries an actor and a source reference (`comms/steward_bus.py`, `audit_events`); facts a person stated about themselves are marked as such; an identifier denylist and an embedding quarantine keep people who should not be searchable out of search; contributed content is anonymised by default; personal messaging accounts are excluded from ingestion; and nothing about a person goes into a public post unless the person supplied it. It also records the one live case where a consent question was raised on a talent pipeline by a partner's advisor, and what changed as a result, and it lists the three things still missing.
 
 ## The infrastructure underneath
 

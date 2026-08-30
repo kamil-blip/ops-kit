@@ -1,6 +1,6 @@
 ---
 name: sourcing-rubric
-description: Turn a hiring-manager brief into a weighted candidate-fit rubric (must-haves as gates, nice-to-haves as points, an evidence quote per criterion, composite computed in code). Use when a headhunter or sourcing operator has a role brief and needs a rubric a search can apply and a hiring manager can audit.
+description: Turn a role or track brief into a weighted candidate-fit rubric (must-haves as gates, nice-to-haves as points, an evidence quote per criterion, composite computed in code). Use when a headhunter or sourcing operator has a role brief and needs a rubric a search can apply and a hiring manager can audit.
 allowed-tools: [Read, Write, Grep, Bash]
 user-invocable: true
 ---
@@ -9,7 +9,7 @@ user-invocable: true
 
 ## When to use
 
-You have a brief from a hiring manager (a call transcript, an email, a job ad) and you need a rubric that (a) a script can apply to every candidate in the database, (b) a person can check line by line, and (c) can be tested against past searches where the outcome is known.
+You have a brief (a call transcript, an email, a job ad) and you need a rubric that (a) a script can apply to every candidate in the database, (b) a person can check line by line, and (c) can be tested against past searches where the outcome is known.
 
 ## What a rubric is here
 
@@ -23,12 +23,12 @@ Every criterion carries `evidence_from`: which attribute or text field the evide
 
 ## Procedure
 
-1. Read the brief. List every must-have the hiring manager stated, in their words. Quote them; do not paraphrase into something broader.
+1. Read the brief. List every must-have the brief states, in its words. Quote them; do not paraphrase into something broader.
 2. For each must-have, find the attribute in the database that carries it (see `db/schema.sql`, the `attributes` table, and the vocabulary already in use). If no attribute exists, the gate cannot be evaluated: say so in the rubric as `"evaluable": false` rather than inventing a proxy.
 3. List the nice-to-haves and traits. Give each a weight from 1 to 5. Sum of weights is the maximum composite. Keep the list short: five to eight point criteria is normal; twelve is a sign the brief was not understood.
 4. Write `rubric.json` next to the brief. Run the search. Read the top ten by hand against the brief. Adjust weights only where the brief supports it, and note the change in `calibration_notes`.
-5. Calibrate against known outcomes when you have them: for a past search with hiring-manager feedback, apply the rubric and record how many of the candidates they rated well land in the top N. Keep those numbers in the rubric file; a rubric with no calibration history is a draft.
-6. When the hiring manager's feedback arrives, record it as a learning (`WHEN / THEN / BECAUSE`) so it surfaces on the next similar brief. Do not silently edit the rubric; the learning is the audit trail for the change.
+5. Calibrate against known outcomes when you have them: for a past search with feedback on the outcome, apply the rubric and record how many of the candidates they rated well land in the top N. Keep those numbers in the rubric file; a rubric with no calibration history is a draft.
+6. When feedback on the list arrives, record it as a learning (`WHEN / THEN / BECAUSE`) so it surfaces on the next similar brief. Do not silently edit the rubric; the learning is the audit trail for the change.
 
 ## What not to do
 

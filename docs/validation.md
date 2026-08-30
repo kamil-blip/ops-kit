@@ -7,7 +7,7 @@ A model that scores candidates or submissions is a measurement instrument. Befor
 1. **Pick a calibration set with human reference scores.** Items that people already reviewed under the same rubric: a past panel's reviews, a past search with the hiring manager's feedback on each candidate, a past cohort with completion outcomes. A hundred items is enough to see the shape; thirty is enough to catch a broken rubric.
 2. **Score the set blind with at least two model families.** Two families, not two sizes of one family, because disagreement between families is the cheapest signal you have for "this item needs a person".
 3. **Report four numbers per model** (`screening/validate.py`):
-   - Spearman rank correlation of model total vs human total. This is the number that matters for ranking use. Anything a hiring manager will read top to bottom is a ranking problem.
+   - Spearman rank correlation of model total vs human total. This is the number that matters for ranking use. Anything the team will read top to bottom is a ranking problem.
    - Mean absolute error on the total, for calibration of the scale.
    - Per-criterion exact-match and within-one rates, to see which criterion the model cannot judge. A criterion with a within-one rate near chance should be dropped from the model's job and given to a person.
    - Share of items more than two points off, which is the list of items to read by hand.

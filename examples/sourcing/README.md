@@ -1,6 +1,6 @@
 # Sourcing demo: a talent search on the kit, end to end
 
-This folder runs one candidate search the way an AI-assisted sourcing service runs: a hiring manager's brief, a rubric written as a Claude Code skill, a search over the candidate database, a ranked shortlist with an evidence quote for every score, a human deciding who to send, and the hiring manager's feedback stored so it shapes the next search. It runs offline, needs no API key, and writes only to the kit's own tables through the kit's own write path.
+This folder runs one candidate search end to end: a brief, a rubric written as a Claude Code skill, a search over the candidate database, a ranked shortlist with an evidence quote for every score, a human deciding who to send, and the hiring manager's feedback stored so it shapes the next search. It runs offline, needs no API key, and writes only to the kit's own tables through the kit's own write path.
 
 Everything in it is fictional: the organisation, the brief, the twenty candidates, their employers, the feedback. Emails are on `example.org`.
 
@@ -18,7 +18,7 @@ The three steps can also be run one at a time: `seed_candidates.py`, `search.py`
 
 ## What each step does
 
-**`brief.md`** is the hiring manager's brief for an Operations Lead at a 12-person AI governance nonprofit in London: four must-haves, four nice-to-haves, named traits, location and sponsorship.
+**`brief.md`** is the brief for an Operations Lead at a 12-person AI governance nonprofit in London: four must-haves, four nice-to-haves, named traits, location and sponsorship.
 
 **`rubric-skill/`** is a Claude Code skill (`SKILL.md`) that turns a brief into a rubric, and the rubric it produced for this brief (`rubric.json`): must-haves as gates, nice-to-haves as weighted points, the brief's own wording attached to each criterion, and a calibration log. The composite is computed by the script, never by a model.
 
@@ -26,7 +26,7 @@ The three steps can also be run one at a time: `seed_candidates.py`, `search.py`
 
 **`search.py`** loads the rubric, pulls each candidate's attributes, observations and current employer from the database, applies the gates (a failed gate ends the evaluation with the reason), then the points, and prints the ranked list with the evidence and its source on every line. It then makes the headhunter's call: the two to send, the next in line, and the least confident pick with the most likely way it turns out wrong. The shortlist is written to `shortlist.json`.
 
-**`feedback.py`** takes the hiring manager's (fictional) feedback and records it the way the kit records anything learned: a learning row in `WHEN / THEN / BECAUSE` form, written through the steward bus with the feedback as its source quote. It then runs the same retrieval the `UserPromptSubmit` hook runs (`learning/learnings_retrieval.py`) against a new, similar brief, to show the learning surfacing on the next search.
+**`feedback.py`** takes the (fictional) feedback from the person who wrote the brief and records it the way the kit records anything learned: a learning row in `WHEN / THEN / BECAUSE` form, written through the steward bus with the feedback as its source quote. It then runs the same retrieval the `UserPromptSubmit` hook runs (`learning/learnings_retrieval.py`) against a new, similar brief, to show the learning surfacing on the next search.
 
 ## Output
 
@@ -82,7 +82,7 @@ shortlist written: ...\examples\sourcing\shortlist.json
 
 === feedback.py  ===
 Feedback received:
-  Hiring manager, one week after the list (fictional): the second candidate was strong and is interviewing. The first withdrew after the screening call; their current organisation made a counter-offer the same week. The next-in-line profile we would not have interviewed: the automation on their form was a leave tracker in Airtable, not the kind of pipeline we need.
+  Feedback one week after the list (fictional): the second candidate was strong and is interviewing. The first withdrew after the screening call; their current organisation made a counter-offer the same week. The next-in-line profile we would not have interviewed: the automation on their form was a leave tracker in Airtable, not the kind of pipeline we need.
 
 Learning written through the steward bus: id=1 LRN-DEMO-SOURCING-001 status=active (bus result: promoted)
 
@@ -110,7 +110,7 @@ The learning surfaces through the kit's own hybrid retrieval (FTS5, with the vec
 ## Files
 
 ```
-brief.md                 the hiring manager's brief (HYPOTHETICAL)
+brief.md                 the brief (HYPOTHETICAL)
 rubric-skill/SKILL.md    the skill that turns a brief into a rubric
 rubric-skill/rubric.json the rubric for this brief
 seed_candidates.py       20 fictional candidates through the steward bus; --reset removes them

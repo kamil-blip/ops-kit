@@ -1,8 +1,8 @@
 # Data provenance, consent and acceptable use
 
-The test for any source in a talent database: where did this come from, how are we allowed to use it, and would we be comfortable explaining that use to the person concerned? This document is how the system this repository was carved from answers those three questions, mechanism by mechanism, and where it still falls short.
+For every record about a person, three things should be answerable: who gave us the fact, what that person agreed to, and whether we could tell them how it is used without embarrassment. This document is how the system this repository was carved from answers them, mechanism by mechanism, and where it still falls short.
 
-## Where did this come from
+## Who gave us the fact
 
 Every canonical fact about a person carries three things: the actor that wrote it, a source reference, and, for anything extracted from a message, the verbatim quote it was extracted from with its position in the source. Writes that arrive without an actor are rejected at the write path, not flagged afterwards.
 
@@ -15,7 +15,7 @@ Facts are tagged by how they were established:
 
 The distinction matters for use. A self-stated seniority or interest is usable for matching. A model-inferred one is a lead to check, not a fact to send.
 
-## How are we allowed to use it
+## What the person agreed to
 
 The system does not answer this with a policy document; it answers it with what it refuses to do.
 
@@ -26,7 +26,7 @@ The system does not answer this with a policy document; it answers it with what 
 - **Contributed content is anonymised by default** when it is used outside the context it was given in.
 - **An identifier denylist and an embedding quarantine** keep people who asked not to be findable, or whose identity could not be verified, out of search results.
 
-## Would we be comfortable explaining it to the person
+## Could we tell them how it is used
 
 The live case. In spring 2026 a partner organisation's advisor raised the consent question on a talent pipeline built from hackathon participants: what had participants agreed to when they signed up, and could their data be shared onward. The honest answer at the time was that the only consent captured was a checkbox for a six-month follow-up. No participant data was shared. The change proposed and adopted: a data-use notice on the signup form and two separate consent checkboxes, one for future contact about opportunities, one for sharing with third parties, so that "how are we allowed to use it" is answered at the point of collection rather than reconstructed later.
 

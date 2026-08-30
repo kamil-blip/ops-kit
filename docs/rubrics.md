@@ -37,6 +37,6 @@ Keep every rubric versioned. When the model changes, re-run the calibration set;
 
 **Demographic and geographic drift.** Names, institutions and English fluency leak into scores. The rule here is mechanical: score the record's claims, quote the evidence, and audit the top and bottom of the list for anything that looks like a pattern of who rather than what.
 
-**Gates that are secretly points.** "Interest in AI safety" written as a gate will fail the candidate the hiring manager most wanted. Read the brief again.
+**Gates that are secretly points.** "Interest in AI safety" written as a gate will fail the candidate the brief most wanted. Read the brief again.
 
 **Overselling the batch to the reviewer.** A rubric is also a promise to the people you send records to. A reviewer told "top-tier submissions" who receives five weak ones withdraws, and that was a fit mistake on the sender's side.
