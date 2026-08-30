@@ -1,6 +1,6 @@
 # Sourcing demo: a talent search on the kit, end to end
 
-This folder runs one candidate search the way an AI-assisted headhunting service describes its own workflow: a hiring manager's brief, a rubric written as a Claude Code skill, a search over the candidate database, a ranked shortlist with an evidence quote for every score, a human deciding who to send, and the hiring manager's feedback stored so it shapes the next search. It runs offline, needs no API key, and writes only to the kit's own tables through the kit's own write path.
+This folder runs one candidate search the way an AI-assisted sourcing service runs: a hiring manager's brief, a rubric written as a Claude Code skill, a search over the candidate database, a ranked shortlist with an evidence quote for every score, a human deciding who to send, and the hiring manager's feedback stored so it shapes the next search. It runs offline, needs no API key, and writes only to the kit's own tables through the kit's own write path.
 
 Everything in it is fictional: the organisation, the brief, the twenty candidates, their employers, the feedback. Emails are on `example.org`.
 
@@ -72,7 +72,7 @@ Candidates evaluated: 20. Passed all 4 gates: 7. Max points: 15.
       gate owned_bookkeeping_payroll    FAIL   owned_bookkeeping_payroll=no  <demo_intake_form:form-002>
       note: do not send: fails owned_bookkeeping_payroll, owned_hr_systems
 
-Headhunter's call (the human filter):
+The human filter:
   send: Chloe Bennett (15/15), Signal Field Collective
   send: Fatima Al-Sayed (13/15), Lattice Alignment Research
   next in line, not sent: Ada Okonkwo (12/15)
@@ -114,7 +114,7 @@ brief.md                 the hiring manager's brief (HYPOTHETICAL)
 rubric-skill/SKILL.md    the skill that turns a brief into a rubric
 rubric-skill/rubric.json the rubric for this brief
 seed_candidates.py       20 fictional candidates through the steward bus; --reset removes them
-search.py                gates, points, evidence, the headhunter's call; writes shortlist.json
+search.py                gates, points, evidence, the human filter; writes shortlist.json
 feedback.py              hiring-manager feedback as a learning; shows it surfacing
 run_demo.py              the three steps in order
 _common.py               paths, connection, demo tag

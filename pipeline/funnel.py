@@ -1,4 +1,4 @@
-"""The numbers a headhunting team asks for, computed from the tables.
+"""The numbers a sourcing team asks for, computed from the tables.
 
 Per search and overall: candidates worked, contacted, confirmed, delivered, declined,
 no reply, decline rate, conversion (confirmed / contacted), completion (delivered /

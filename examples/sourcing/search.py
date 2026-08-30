@@ -127,7 +127,7 @@ def main(argv) -> int:
         print(f"      note: {note_for(r)}\n")
 
     send = passing[: rubric["send_count"]]
-    print("Headhunter's call (the human filter):")
+    print("The human filter:")
     for r in send:
         print(f"  send: {r['name']} ({r['composite']}/{r['max']}), {r['org']}")
     if len(passing) > rubric["send_count"]:

@@ -49,7 +49,7 @@
       "kind": "points",
       "weight": 0.5,
       "description": "Read or engaged with the field; not a gate, and never traded against the gates.",
-      "signals": ["ai safety", "alignment", "biosecurity", "effective altruism", "governance", "superintelligence", "80,000 hours"],
+      "signals": ["ai safety", "alignment", "biosecurity", "effective altruism", "governance", "superintelligence"],
       "anchors": {"5": "Worked in or around the field.", "3": "Read into it or took a course.", "1": "No evidence, which is fine for this role."}
     },
     {
