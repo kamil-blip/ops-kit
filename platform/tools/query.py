@@ -59,7 +59,12 @@ TRACE_LOG = str(_ROOT / "data" / "query_trace.log")
 
 
 def _tool(*parts):
-    """Resolve a sibling capability script relative to the repo root."""
+    """Resolve a sibling capability script. Capability directories live under
+    platform/ since the August 2026 reorganisation; fall back to the root for
+    a flat layout."""
+    under_platform = _ROOT.joinpath("platform", *parts)
+    if under_platform.exists():
+        return str(under_platform)
     return str(_ROOT.joinpath(*parts))
 
 
