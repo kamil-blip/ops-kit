@@ -227,7 +227,7 @@ Run monthly (or after each major event/project cycle, whichever comes first):
 8. **Review audit logs.** Query the `audit_events` and `bus_events` tables via platform/tools/query.py for frequent-edit patterns (files touched often might need better structure).
 9. **Clean changelog entries.** `DELETE FROM reference_docs WHERE category='changelog' AND updated_at < date('now', '-60 days')`.
 10. **Update "Last updated" dates** on files that were touched.
-11. **Graph: archive stale entities.** `python platform/tools/query.py "SELECT id, name FROM entities WHERE status='active' AND updated_at < date('now', '-90 days')"` — review and archive if truly inactive.
+11. **Graph: archive stale entities.** `python platform/tools/query.py "SELECT id, name FROM entities WHERE status='active' AND updated_at < date('now', '-90 days')"` , then review and archive if truly inactive.
 12. **Graph: merge duplicate entities.** Search by name for duplicates, merge edges, delete the duplicate.
 13. **Graph: verify active entities.** Spot-check 10 active entities for data currency.
 

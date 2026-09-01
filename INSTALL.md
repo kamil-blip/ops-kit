@@ -48,7 +48,7 @@ copy config.example.toml config.toml     # (cp on mac/linux)
 ```
 
 Open `config.toml` and fill in, at minimum, `[operator] name`, `timezone`,
-and `emails`. Leave anything you don't use blank — blank means disabled.
+and `emails`. Leave anything you don't use blank; blank means disabled.
 API keys do NOT go in this file: put them in environment variables or the OS
 keyring under service `ops-kit` (e.g. `keyring set ops-kit GEMINI_API_KEY`).
 

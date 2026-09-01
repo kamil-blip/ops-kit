@@ -45,7 +45,7 @@ Measured on the source system's database on 28 and 30 August 2026, restricted to
 | Measure | Value |
 |---|---|
 | Sprints sourced for | 8 (a ninth in preparation), one fellowship alongside |
-| Candidates worked (distinct people, judge and speaker searches) | 568 |
+| Candidates worked (distinct people, judge and speaker searches) | 693 |
 | Confirmed judges | 250 |
 | Confirmed speakers | 81 |
 | Acceptance rate, per search | 32% to 75% |
@@ -57,10 +57,10 @@ Measured on the source system's database on 28 and 30 August 2026, restricted to
 | Rubric scoring validated against human reviews | 121 projects; rank correlation 0.43 for the better model, 0.21 for the weaker, 0.57 between the two |
 | Assignments produced by the solver across three sprints | 1,732; largest run 770 assignments over 104 reviewers, zero conflicts, zero uncovered items |
 | Partner, co-organiser, funder and sponsor organisations | 40 |
-| Local hubs and venues | 16 hubs, 41 venues in 34 cities |
+| Local hubs | 44 hub runs across 25 identified cities in 17 countries |
 | Submitted projects and reviews recorded | 1,023 projects, 1,913 reviews |
 
-What these numbers are not: a participant count (signups are not stored per event in the database the way judges are), or a claim that every confirmed judge was new to the field. The section on counterfactual value below says what is measured and what is not.
+What these numbers are not: a claim that every confirmed judge was new to the field. The section on counterfactual value below says what is measured and what is not.
 
 ## Run it
 

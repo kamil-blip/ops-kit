@@ -18,7 +18,7 @@ The rule behind it (three persistence layers, no crossover): `action_items` hold
 
 ## Workflow
 
-### Step 1 — Pull the batch
+### Step 1. Pull the batch
 
 ```
 python platform/tasks/task_manager.py inbox list --limit 15
@@ -26,7 +26,7 @@ python platform/tasks/task_manager.py inbox list --limit 15
 
 This lists up to 15 pending proposals grouped by source (`ORDER BY source, proposed_at DESC`, so newest first within each source group, NOT newest 15 overall) with `inbox_id`, source, age, suggested description, evidence quote.
 
-### Step 2 — Pre-filter obvious decay
+### Step 2. Pre-filter obvious decay
 
 Before asking the operator, identify and **bulk-reject** items that are clearly stale:
 
@@ -38,7 +38,7 @@ Before asking the operator, identify and **bulk-reject** items that are clearly 
 task_manager.py inbox bulk-reject "demoted:auto-extracted from email" "stale auto-extracted, aged-out"
 ```
 
-### Step 3 — Present the rest via AskUserQuestion
+### Step 3. Present the rest via AskUserQuestion
 
 Group remaining proposals (typically 5-10 after pre-filter) into one `AskUserQuestion` call as a multi-select question:
 
@@ -54,7 +54,7 @@ Selected → promote with `inbox accept`. Unselected → reject as "not actionab
 
 For each selected, follow up if priority is unclear or it should merge into an existing item.
 
-### Step 4 — Apply
+### Step 4. Apply
 
 For each promote:
 ```
@@ -71,7 +71,7 @@ For each merge into an existing canonical item:
 task_manager.py inbox merge AI-IN-... AI-20260518-...
 ```
 
-### Step 5 — Report
+### Step 5. Report
 
 After the batch, report counts: N promoted, M rejected, K merged, plus what's still pending. If pending > 20, schedule another triage batch later.
 
@@ -81,24 +81,24 @@ After the batch, report counts: N promoted, M rejected, K merged, plus what's st
 - `suggested_description` starts with a formulaic "Confirm the meeting/talk/time/details/format/duration..." phrasing (the extractor's refusal filter targets exactly these)
 - `suggested_description` is empty or <20 chars
 - Same `email_thread_id` already has an OPEN action_item (the inbox dedup should have caught this; if it didn't, the inbox row is stale)
-- `source LIKE 'demoted:auto-extracted from email%'` — these are model-written ad-hoc captures, low signal
+- `source LIKE 'demoted:auto-extracted from email%'`, these are model-written ad-hoc captures, low signal
 
 **Auto-defer candidates:**
-- Items from a meeting-transcript source with no `evidence_quote` populated — defer 7 days
+- Items from a meeting-transcript source with no `evidence_quote` populated, defer 7 days
 
 ## Anti-patterns
 
 - **Don't** present a hundred proposals in one giant question. Batch by source or by date.
 - **Don't** silently accept-all or reject-all without showing the evidence to the operator. The whole point is human judgment.
-- **Don't** create new ad-hoc Python scripts that write directly to `action_items` — every extractor / handler must propose into the inbox via task_manager's gated insert path. The triage workflow only works if all auto-extraction goes through the inbox.
+- **Don't** create new ad-hoc Python scripts that write directly to `action_items`. Every extractor / handler must propose into the inbox via task_manager's gated insert path. The triage workflow only works if all auto-extraction goes through the inbox.
 
 ## When NOT to triage
 
-- Email SLA-lane triage (`platform/comms/inbox_triage.py` / the `ops_inbox` MCP tool, surfaced via `query.py inbox`) is a different thing — that's email lane classification, owned by `daily-debrief`, not action_item proposals. Disambiguate by phrase: **"inbox triage"** (email SLA lanes → `ops_inbox` / `daily-debrief`) vs **"triage inbox" / "review proposals"** (these `action_items_inbox` proposals → this skill). Don't confuse them.
+- Email SLA-lane triage (`platform/comms/inbox_triage.py` / the `ops_inbox` MCP tool, surfaced via `query.py inbox`) is a different thing, that is email lane classification, owned by `daily-debrief`, not action_item proposals. Disambiguate by phrase: **"inbox triage"** (email SLA lanes → `ops_inbox` / `daily-debrief`) vs **"triage inbox" / "review proposals"** (these `action_items_inbox` proposals → this skill). Don't confuse them.
 - Mid-session, mid-other-task: only invoke when the operator explicitly asks. Don't interrupt other work.
 
 ## Related
 
 - `task_manager.py add` routes non-canonical sources into the inbox automatically; only canonical sources (manual, operator-direct, template_step, inbox-promoted, wrap-up-confirmed) write straight to `action_items`
-- `task_manager.py demote-untrusted` — pulls already-created action_items with bad sources back into the inbox
+- `task_manager.py demote-untrusted`, pulls already-created action_items with bad sources back into the inbox
 - Three persistence layers rule: action_items = human-curated, template_tasks = recurring runbook steps, system_upgrades = infra/tech-debt. Record it as a learning in your own `learnings` table so it surfaces on retrieval.
